@@ -25,8 +25,4 @@ export class CreateUsuarioDto {
   @MinLength(4)
   @IsNotEmpty()
   contrasenaUsuario: string;
-
-  @IsString()
-  @MinLength(3)
-  rolUsuario: string;
 }

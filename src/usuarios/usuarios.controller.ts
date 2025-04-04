@@ -25,7 +25,7 @@ export class UsuariosController {
     return this.usuariosService.findAll();
   }
 
-  @Get(':id')
+  @Get(':idUsuario')
   findOne(@Param('idUsuario') idUsuario: number) {
     return this.usuariosService.findOne(idUsuario);
   }

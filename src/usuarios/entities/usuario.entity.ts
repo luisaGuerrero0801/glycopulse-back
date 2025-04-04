@@ -22,7 +22,4 @@ export class Usuario {
 
   @Column({ nullable: false })
   contrasenaUsuario: string;
-
-  @Column({ default: 'paciente' })
-  rolUsuario: string;
 }

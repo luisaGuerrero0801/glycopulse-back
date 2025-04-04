@@ -7,6 +7,7 @@ import { CategoriasModule } from './categorias/categorias.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { AuthModule } from './auth/auth.module';
 import { GlucometriasModule } from './glucometrias/glucometrias.module';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { GlucometriasModule } from './glucometrias/glucometrias.module';
     UsuariosModule,
     AuthModule,
     GlucometriasModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -31,9 +31,4 @@ export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
   @MinLength(4)
   @IsOptional()
   contrasenaUsuario?: string;
-
-  @IsString()
-  @MinLength(3)
-  @IsOptional()
-  rolUsuario?: string;
 }

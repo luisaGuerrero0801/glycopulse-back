@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateCategoriaDto } from './dto/create-categoria.dto';
-/**import { UpdateCategoriaDto } from './dto/update-categoria.dto';**/
+import { UpdateCategoriaDto } from './dto/update-categoria.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Categoria } from './entities/categoria.entity';
 import { Repository } from 'typeorm';
@@ -21,13 +21,13 @@ export class CategoriasService {
     return await this.categorias.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} categoria`;
+  async findOne(idCategoria: number) {
+    return await this.categorias.findOneBy({ idCategoria });
   }
 
-  /**update(id: number, updateCategoriaDto: UpdateCategoriaDto) {
-    return `This action updates a #${id} categoria`;
-  }**/
+  async update(idCategoria: number, updateCategoria: UpdateCategoriaDto) {
+    return await this.categorias.update(idCategoria, updateCategoria);
+  }
 
   async remove(idCategoria: number) {
     const categoria = await this.categorias.findOneBy({ idCategoria });
