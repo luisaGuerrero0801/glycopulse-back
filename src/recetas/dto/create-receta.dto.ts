@@ -23,6 +23,9 @@ export class CreateRecetaDto {
   @IsString()
   @MinLength(1)
   tiempoReceta: string;
+  @IsString()
+  @MinLength(1)
+  imagenReceta: string;
 
   @IsString()
   @MinLength(1)

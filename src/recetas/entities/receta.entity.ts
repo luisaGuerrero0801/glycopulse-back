@@ -23,6 +23,8 @@ export class Receta {
 
   @Column()
   tiempoReceta: string;
+  @Column()
+  imagenReceta: string;
 
   @Column()
   nivelReceta: string;
