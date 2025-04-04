@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { Rol } from 'src/roles/entities/rol.entity';
 
 @Entity()
 export class Usuario {
@@ -22,4 +29,14 @@ export class Usuario {
 
   @Column({ nullable: false })
   contrasenaUsuario: string;
+
+  @Column({ nullable: false })
+  ciudadUsuario: string;
+
+  @Column({ nullable: false })
+  paisUsuario: string;
+
+  @ManyToOne(() => Rol, (rol) => rol.usuarios)
+  @JoinColumn({ name: 'idRol' })
+  rol: Rol;
 }

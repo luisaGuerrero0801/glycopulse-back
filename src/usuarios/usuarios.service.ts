@@ -1,18 +1,31 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { Usuario } from './entities/usuario.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Rol } from 'src/roles/entities/rol.entity';
 import * as bcryptjs from 'bcryptjs';
 
 @Injectable()
 export class UsuariosService {
   constructor(
     @InjectRepository(Usuario) private readonly usuarios: Repository<Usuario>,
+    @InjectRepository(Rol) private readonly roles: Repository<Rol>,
   ) {}
 
   async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
+    const rol = await this.roles.findOne({
+      where: { idRol: createUsuarioDto.idRol },
+    });
+
+    if (!rol) throw new NotFoundException('Id de Rol no encontrado');
+
     const existingUser = await this.findOneByEmail(
       createUsuarioDto.correoUsuario,
     );
@@ -40,24 +53,36 @@ export class UsuariosService {
 
     // Crear el nuevo usuario
     const usuario = this.usuarios.create({
-      ...createUsuarioDto,
+      nombresUsuario: createUsuarioDto.nombresUsuario,
+      apellidosUsuario: createUsuarioDto.apellidosUsuario,
+      generoUsuario: createUsuarioDto.generoUsuario,
+      correoUsuario: createUsuarioDto.correoUsuario,
       contrasenaUsuario: hashedPassword,
+      ciudadUsuario: createUsuarioDto.ciudadUsuario,
+      paisUsuario: createUsuarioDto.paisUsuario,
       fechaNacimientoUsuario: fechaNacimiento,
+      rol,
     });
 
     return await this.usuarios.save(usuario);
   }
 
-  findOneByEmail(correoUsuario: string) {
-    return this.usuarios.findOneBy({ correoUsuario });
+  async findOneByEmail(correoUsuario: string) {
+    return this.usuarios.findOne({
+      where: { correoUsuario },
+      relations: ['rol'],
+    });
   }
 
   async findAll() {
-    return await this.usuarios.find();
+    return await this.usuarios.find({ relations: ['rol'] });
   }
 
   async findOne(idUsuario: number) {
-    return await this.usuarios.findOneBy({ idUsuario });
+    return await this.usuarios.findOne({
+      where: { idUsuario },
+      relations: ['rol'],
+    });
   }
 
   async update(
@@ -80,6 +105,7 @@ export class UsuariosService {
         HttpStatus.OK,
       );
     }
+
     const fechaNacimiento = new Date(updateUsuarioDto.fechaNacimientoUsuario);
 
     // Verificar que la conversión de la fecha es válida
@@ -89,12 +115,21 @@ export class UsuariosService {
         HttpStatus.OK,
       );
     }
+
     if (updateUsuarioDto.contrasenaUsuario) {
       const salt = await bcryptjs.genSalt(10); // Generar un salt
       updateUsuarioDto.contrasenaUsuario = await bcryptjs.hash(
         updateUsuarioDto.contrasenaUsuario,
         salt, // Hashear la contraseña
       );
+    }
+
+    if (updateUsuarioDto.idRol) {
+      const rol = await this.roles.findOne({
+        where: { idRol: updateUsuarioDto.idRol },
+      });
+      if (!rol) throw new NotFoundException(`Id de rol no encontrado`);
+      usuario.rol = rol;
     }
 
     Object.assign(usuario, updateUsuarioDto, {
