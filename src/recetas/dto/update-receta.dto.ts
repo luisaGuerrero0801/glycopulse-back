@@ -34,6 +34,11 @@ export class UpdateRecetaDto extends PartialType(CreateRolDto) {
   @IsString()
   @MinLength(1)
   @IsOptional()
+  imagenReceta: string;
+
+  @IsString()
+  @MinLength(1)
+  @IsOptional()
   nivelReceta?: string;
 
   @IsString()

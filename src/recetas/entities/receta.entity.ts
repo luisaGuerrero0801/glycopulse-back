@@ -25,6 +25,9 @@ export class Receta {
   tiempoReceta: string;
 
   @Column()
+  imagenReceta: string;
+
+  @Column()
   nivelReceta: string;
 
   @Column({ type: 'longtext' })

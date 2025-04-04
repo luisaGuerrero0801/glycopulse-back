@@ -9,18 +9,27 @@ import {
 export class CreateUsuarioDto {
   @IsString()
   @MinLength(3)
+  @IsNotEmpty()
   nombresUsuario: string;
 
   @IsString()
   @MinLength(3)
+  @IsNotEmpty()
   apellidosUsuario: string;
 
   @IsString()
+  @IsNotEmpty()
   fechaNacimientoUsuario: string;
 
   @IsString()
   @MinLength(1)
+  @IsNotEmpty()
   generoUsuario: string;
+
+  @IsString()
+  @MinLength(2)
+  @IsNotEmpty()
+  rhUsuario: string;
 
   @IsEmail()
   @MinLength(10)

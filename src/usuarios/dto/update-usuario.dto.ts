@@ -28,6 +28,11 @@ export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
   @IsOptional()
   generoUsuario?: string;
 
+  @IsString()
+  @MinLength(2)
+  @IsOptional()
+  rhUsuario: string;
+
   @IsEmail()
   @MinLength(10)
   @IsOptional()

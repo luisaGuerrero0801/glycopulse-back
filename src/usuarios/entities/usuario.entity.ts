@@ -24,6 +24,9 @@ export class Usuario {
   @Column()
   generoUsuario: string;
 
+  @Column({ type: 'varchar' })
+  rhUsuario;
+
   @Column({ unique: true, nullable: false })
   correoUsuario: string;
 
