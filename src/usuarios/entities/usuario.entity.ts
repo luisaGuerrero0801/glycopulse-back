@@ -5,16 +5,16 @@ export class Usuario {
   @PrimaryGeneratedColumn()
   idUsuario: number;
 
-  @Column()
+  @Column({type:'text'})
   nombresUsuario: string;
 
-  @Column()
+  @Column({type:'text'})
   apellidosUsuario: string;
 
   @Column({ type: 'date' })
   fechaNacimientoUsuario: Date;
 
-  @Column()
+  @Column({type:'text'})
   generoUsuario: string;
 
   @Column({ unique: true, nullable: false })
@@ -22,4 +22,17 @@ export class Usuario {
 
   @Column({ nullable: false })
   contrasenaUsuario: string;
+
+  @Column({type:'int'})
+  telefonoUsuario
+
+  @Column({type:'int'})
+  edadUsuario
+
+  @Column({type:'varchar'})
+  rhUsuario
+
+  @Column({type:'text'})
+  ubicacionUsuario
 }
+
