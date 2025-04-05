@@ -4,8 +4,10 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { Rol } from 'src/roles/entities/rol.entity';
+import { Glucometria } from 'src/glucometrias/entities/glucometria.entity';
 
 @Entity()
 export class Usuario {
@@ -42,4 +44,7 @@ export class Usuario {
   @ManyToOne(() => Rol, (rol) => rol.usuarios)
   @JoinColumn({ name: 'idRol' })
   rol: Rol;
+
+  @OneToMany(() => Glucometria, (glucometria) => glucometria.usuario)
+  glucometrias: Glucometria[];
 }

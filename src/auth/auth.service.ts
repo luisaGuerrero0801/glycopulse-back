@@ -18,12 +18,12 @@ export class AuthService {
       throw new UnauthorizedException('Su email no se encuentra registrado');
     }
 
-    const contraseñaValida = await bcryptjs.compare(
+    const contraseniaValida = await bcryptjs.compare(
       contrasenaUsuario,
       user.contrasenaUsuario,
     );
 
-    if (!contraseñaValida) {
+    if (!contraseniaValida) {
       throw new UnauthorizedException('contraseña invalida');
     }
 

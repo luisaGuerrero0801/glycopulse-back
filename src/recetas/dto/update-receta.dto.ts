@@ -32,7 +32,6 @@ export class UpdateRecetaDto extends PartialType(CreateRolDto) {
   tiempoReceta?: string;
 
   @IsString()
-  @MinLength(1)
   @IsOptional()
   imagenReceta: string;
 
