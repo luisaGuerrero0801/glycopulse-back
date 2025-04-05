@@ -21,8 +21,8 @@ export class GlucometriasService {
     return await this.glucometrias.save(createGlucometriaDto);
   }
 
-  findAll() {
-    return `This action returns all glucometrias`;
+  async findAll() {
+    return await this.glucometrias.find();
   }
 
   findOne(id: number) {
