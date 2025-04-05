@@ -10,6 +10,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Usuario } from 'src/usuarios/entities/usuario.entity';
 import { Glucometria } from './entities/glucometria.entity';
 import { UpdateGlucometriaDto } from './dto/update-glucometria.dto';
+import { es } from 'date-fns/locale';
+import { format } from 'date-fns';
 
 @Injectable()
 export class GlucometriasService {
@@ -41,7 +43,19 @@ export class GlucometriasService {
   }
 
   async findAll() {
-    return await this.glucometrias.find({ relations: ['usuario'] });
+    const registros = await this.glucometrias.find({ relations: ['usuario'] });
+
+    return registros.map((g) => ({
+      ...g,
+      fechaGlucometria: format(
+        new Date(g.fechaGlucometria),
+        'EEE dd MMM yyyy',
+        { locale: es },
+      ),
+      hora: format(new Date(`1970-01-01T${g.horaGlucometria}`), 'hh:mm a', {
+        locale: es,
+      }),
+    }));
   }
 
   async findByFecha(fecha: string) {
