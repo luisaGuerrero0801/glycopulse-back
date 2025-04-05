@@ -33,11 +33,11 @@ export class GlucometriasController {
     return this.glucometrias.findAll();
   }
 
-  @Get(':idGlucometria')
+  @Get('fecha/:fecha')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('Paciente')
-  findOne(@Param('idGlucometria') idGlucometria: number) {
-    return this.glucometrias.findOne(idGlucometria);
+  findByFecha(@Param('fecha') fecha: string) {
+    return this.glucometrias.findByFecha(fecha);
   }
 
   @Patch(':idGlucometria')

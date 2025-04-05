@@ -12,7 +12,6 @@ export class UpdateGlucometriaDto extends PartialType(CreateGlucometriaDto) {
   horaGlucometria: string;
 
   @IsInt()
-  @MinLength(1)
   nivelGlucometria: number;
 
   @IsString()

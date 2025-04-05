@@ -10,7 +10,6 @@ export class CreateGlucometriaDto {
   horaGlucometria: string;
 
   @IsInt()
-  @MinLength(1)
   nivelGlucometria: number;
 
   @IsString()

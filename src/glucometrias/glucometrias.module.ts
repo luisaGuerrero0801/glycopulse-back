@@ -15,5 +15,6 @@ import { Usuario } from 'src/usuarios/entities/usuario.entity';
   ],
   controllers: [GlucometriasController],
   providers: [GlucometriasService],
+  exports: [GlucometriasService, TypeOrmModule],
 })
 export class GlucometriasModule {}
