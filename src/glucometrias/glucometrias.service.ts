@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -23,19 +24,30 @@ export class GlucometriasService {
 
   async create(
     createGlucometriaDto: CreateGlucometriaDto,
+    userId: string,
   ): Promise<Glucometria> {
+    const userIdNumber = Number(userId);
+
+    if (isNaN(userIdNumber)) {
+      throw new BadRequestException('El ID de usuario no es válido');
+    }
+
     const usuario = await this.usuarios.findOne({
-      where: { idUsuario: createGlucometriaDto.idUsuario },
+      where: { idUsuario: userIdNumber },
     });
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado');
     }
 
+    const comentario = this.obtenerComentarioPorNivel(
+      createGlucometriaDto.nivelGlucometria,
+    );
+
     const nuevaGlucometria = this.glucometrias.create({
       fechaGlucometria: createGlucometriaDto.fechaGlucometria,
       horaGlucometria: createGlucometriaDto.horaGlucometria,
       nivelGlucometria: createGlucometriaDto.nivelGlucometria,
-      recomendacionGlucometria: createGlucometriaDto.recomendacionGlucometria,
+      recomendacionGlucometria: comentario,
       usuario,
     });
 
@@ -75,6 +87,28 @@ export class GlucometriasService {
       ...g,
       fechaGlucometria: this.formatFecha(g.fechaGlucometria),
     }));
+  }
+
+  async findOne(idGlucometria: number) {
+    const glucometria = await this.glucometrias.findOneBy({ idGlucometria });
+
+    if (!glucometria) {
+      throw new NotFoundException('Glucometría no encontrada');
+    }
+
+    return {
+      ...glucometria,
+      fechaGlucometria: format(
+        new Date(glucometria.fechaGlucometria),
+        'EEE dd MMM yyyy',
+        { locale: es },
+      ),
+      hora: format(
+        new Date(`1970-01-01T${glucometria.horaGlucometria}`),
+        'hh:mm a',
+        { locale: es },
+      ),
+    };
   }
 
   async update(
@@ -124,5 +158,17 @@ export class GlucometriasService {
       month: 'long',
       year: 'numeric',
     }).format(fecha);
+  }
+
+  private obtenerComentarioPorNivel(nivelGlucometria: number): string {
+    if (nivelGlucometria < 70) {
+      return 'Hipoglucemia: Comer una fuente de glucosa rápida (jugo, azúcar); consultar al médico si es recurrente.';
+    } else if (nivelGlucometria >= 70 && nivelGlucometria <= 99) {
+      return 'Normal: Mantener hábitos saludables (dieta balanceada, ejercicio regular).';
+    } else if (nivelGlucometria >= 100 && nivelGlucometria <= 125) {
+      return 'Glucosa alterada / prediabetes: Cambios en el estilo de vida, control más frecuente; posible consulta con nutricionista.';
+    } else {
+      return 'Diabetes probable: Evaluación médica para diagnóstico formal y posible inicio de tratamiento.';
+    }
   }
 }
