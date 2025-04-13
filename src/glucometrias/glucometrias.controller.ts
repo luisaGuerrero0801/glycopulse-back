@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { GlucometriasService } from './glucometrias.service';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
@@ -14,6 +15,7 @@ import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { CreateGlucometriaDto } from './dto/create-glucometria.dto';
 import { UpdateGlucometriaDto } from './dto/update-glucometria.dto';
+import { Request } from 'express';
 
 @Controller('glucometrias')
 export class GlucometriasController {
@@ -22,8 +24,12 @@ export class GlucometriasController {
   @Post()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('Paciente')
-  create(@Body() createGlucometriaDto: CreateGlucometriaDto) {
-    return this.glucometrias.create(createGlucometriaDto);
+  create(
+    @Body() createGlucometriaDto: CreateGlucometriaDto,
+    @Req() req: Request,
+  ) {
+    const userId = req.user?.sub;
+    return this.glucometrias.create(createGlucometriaDto, userId);
   }
 
   @Get()
@@ -33,6 +39,12 @@ export class GlucometriasController {
     return this.glucometrias.findAll();
   }
 
+  @Get(':idGlucometria')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('Paciente')
+  findOne(@Param('idGlucometria') idGlucometria: number) {
+    return this.glucometrias.findOne(idGlucometria);
+  }
   @Get('fecha/:fecha')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('Paciente')

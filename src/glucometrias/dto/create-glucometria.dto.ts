@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, MinLength, IsInt } from 'class-validator';
+import { IsNotEmpty, IsString, IsInt, IsOptional } from 'class-validator';
 
 export class CreateGlucometriaDto {
   @IsString()
@@ -13,11 +13,10 @@ export class CreateGlucometriaDto {
   nivelGlucometria: number;
 
   @IsString()
-  @MinLength(4)
-  @IsNotEmpty()
+  @IsOptional()
   recomendacionGlucometria: string;
 
   @IsInt()
-  @IsNotEmpty()
+  @IsOptional()
   idUsuario: number;
 }
