@@ -16,7 +16,7 @@ import * as bcryptjs from 'bcryptjs';
 export class UsuariosService {
   constructor(
     @InjectRepository(Usuario) private readonly usuarios: Repository<Usuario>,
-    @InjectRepository(Rol) private readonly roles: Repository<Rol>,
+    @InjectRepository(Rol) private readonly roles: Repository<Rol>
   ) {}
 
   async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
@@ -27,12 +27,12 @@ export class UsuariosService {
     if (!rol) throw new NotFoundException('Id de Rol no encontrado');
 
     const existingUser = await this.findOneByEmail(
-      createUsuarioDto.correoUsuario,
+      createUsuarioDto.correoUsuario
     );
     if (existingUser) {
       throw new HttpException(
         'El correo electrónico ya está en uso',
-        HttpStatus.OK,
+        HttpStatus.OK
       );
     }
 
@@ -41,14 +41,14 @@ export class UsuariosService {
     if (isNaN(fechaNacimiento.getTime())) {
       throw new HttpException(
         'La fecha de nacimiento no es válida',
-        HttpStatus.OK,
+        HttpStatus.OK
       );
     }
 
     const salt = await bcryptjs.genSalt(10); // Generar un salt con 10 rondas de seguridad
     const hashedPassword = await bcryptjs.hash(
       createUsuarioDto.contrasenaUsuario,
-      salt,
+      salt
     ); // Hashear la contraseña
 
     // Crear el nuevo usuario
@@ -88,7 +88,7 @@ export class UsuariosService {
 
   async update(
     idUsuario: number,
-    updateUsuarioDto: UpdateUsuarioDto,
+    updateUsuarioDto: UpdateUsuarioDto
   ): Promise<Usuario> {
     const usuario = await this.usuarios.findOneBy({ idUsuario });
 
@@ -97,13 +97,13 @@ export class UsuariosService {
     }
 
     const existingUser = await this.findOneByEmail(
-      updateUsuarioDto.correoUsuario,
+      updateUsuarioDto.correoUsuario
     );
 
     if (existingUser && existingUser.idUsuario !== idUsuario) {
       throw new HttpException(
         'El correo electrónico ya está en uso',
-        HttpStatus.OK,
+        HttpStatus.OK
       );
     }
 
@@ -113,7 +113,7 @@ export class UsuariosService {
     if (isNaN(fechaNacimiento.getTime())) {
       throw new HttpException(
         'La fecha de nacimiento no es válida',
-        HttpStatus.OK,
+        HttpStatus.OK
       );
     }
 
@@ -121,7 +121,7 @@ export class UsuariosService {
       const salt = await bcryptjs.genSalt(10); // Generar un salt
       updateUsuarioDto.contrasenaUsuario = await bcryptjs.hash(
         updateUsuarioDto.contrasenaUsuario,
-        salt, // Hashear la contraseña
+        salt // Hashear la contraseña
       );
     }
 

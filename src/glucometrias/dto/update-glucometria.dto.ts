@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateGlucometriaDto } from './create-glucometria.dto';
-import { IsInt, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsInt, IsOptional, IsString } from 'class-validator';
 
 export class UpdateGlucometriaDto extends PartialType(CreateGlucometriaDto) {
   @IsString()
@@ -15,7 +15,6 @@ export class UpdateGlucometriaDto extends PartialType(CreateGlucometriaDto) {
   nivelGlucometria: number;
 
   @IsString()
-  @MinLength(4)
   @IsOptional()
   recomendacionGlucometria: string;
 

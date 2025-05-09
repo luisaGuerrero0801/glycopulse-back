@@ -1,7 +1,5 @@
 import {
   BadRequestException,
-  HttpException,
-  HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -12,19 +10,19 @@ import { Usuario } from 'src/usuarios/entities/usuario.entity';
 import { Glucometria } from './entities/glucometria.entity';
 import { UpdateGlucometriaDto } from './dto/update-glucometria.dto';
 import { es } from 'date-fns/locale';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 @Injectable()
 export class GlucometriasService {
   constructor(
     @InjectRepository(Usuario) private readonly usuarios: Repository<Usuario>,
     @InjectRepository(Glucometria)
-    private readonly glucometrias: Repository<Glucometria>,
+    private readonly glucometrias: Repository<Glucometria>
   ) {}
 
   async create(
     createGlucometriaDto: CreateGlucometriaDto,
-    userId: string,
+    userId: string
   ): Promise<Glucometria> {
     const userIdNumber = Number(userId);
 
@@ -40,7 +38,7 @@ export class GlucometriasService {
     }
 
     const comentario = this.obtenerComentarioPorNivel(
-      createGlucometriaDto.nivelGlucometria,
+      createGlucometriaDto.nivelGlucometria
     );
 
     const nuevaGlucometria = this.glucometrias.create({
@@ -57,17 +55,21 @@ export class GlucometriasService {
   async findAll() {
     const registros = await this.glucometrias.find({ relations: ['usuario'] });
 
-    return registros.map((g) => ({
-      ...g,
-      fechaGlucometria: format(
-        new Date(g.fechaGlucometria),
-        'EEE dd MMM yyyy',
-        { locale: es },
-      ),
-      hora: format(new Date(`1970-01-01T${g.horaGlucometria}`), 'hh:mm a', {
-        locale: es,
-      }),
-    }));
+    return registros.map((g) => {
+      console.log('Hora recibida:', g.horaGlucometria); // ✅ Confirmar formato
+
+      return {
+        ...g,
+        fechaGlucometria: format(
+          parseISO(g.fechaGlucometria),
+          'EEE dd MMM yyyy',
+          { locale: es }
+        ),
+        hora: format(new Date(`1970-01-01T${g.horaGlucometria}`), 'HH:mm', {
+          locale: es,
+        }),
+      };
+    });
   }
 
   async findByFecha(fecha: string) {
@@ -79,7 +81,7 @@ export class GlucometriasService {
 
     if (glucometriasBuscar.length === 0) {
       throw new NotFoundException(
-        ' No se encontraron glucometrias para esta fecha',
+        ' No se encontraron glucometrias para esta fecha'
       );
     }
 
@@ -99,14 +101,14 @@ export class GlucometriasService {
     return {
       ...glucometria,
       fechaGlucometria: format(
-        new Date(glucometria.fechaGlucometria),
+        parseISO(glucometria.fechaGlucometria),
         'EEE dd MMM yyyy',
-        { locale: es },
+        { locale: es }
       ),
       hora: format(
         new Date(`1970-01-01T${glucometria.horaGlucometria}`),
-        'hh:mm a',
-        { locale: es },
+        'HH:mm',
+        { locale: es }
       ),
     };
   }
@@ -114,26 +116,39 @@ export class GlucometriasService {
   async update(
     idGlucometria: number,
     updateGlucometriaDto: UpdateGlucometriaDto,
+    userId: string
   ): Promise<Glucometria> {
-    const glucometriaBus = await this.glucometrias.findOneBy({ idGlucometria });
+    const userIdNumber = Number(userId);
 
+    if (isNaN(userIdNumber)) {
+      throw new BadRequestException('El ID de usuario no es válido');
+    }
+
+    const usuario = await this.usuarios.findOne({
+      where: { idUsuario: userIdNumber },
+    });
+    if (!usuario) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const glucometriaBus = await this.glucometrias.findOneBy({ idGlucometria });
     if (!glucometriaBus) {
       throw new NotFoundException('Glucometría no encontrada');
     }
 
-    if (updateGlucometriaDto.idUsuario) {
-      const usuario = await this.usuarios.findOneBy({
-        idUsuario: updateGlucometriaDto.idUsuario,
-      });
+    // Obtener el comentario basado en el nivel de glucosa
+    const comentario = this.obtenerComentarioPorNivel(
+      updateGlucometriaDto.nivelGlucometria
+    );
 
-      if (!usuario) {
-        throw new NotFoundException('Usuario no encontrado');
-      }
-
-      glucometriaBus.usuario = usuario;
-    }
-
-    Object.assign(glucometriaBus, updateGlucometriaDto);
+    // Asignar los nuevos valores al objeto glucometriaBus
+    Object.assign(glucometriaBus, {
+      fechaGlucometria: updateGlucometriaDto.fechaGlucometria,
+      horaGlucometria: updateGlucometriaDto.horaGlucometria,
+      nivelGlucometria: updateGlucometriaDto.nivelGlucometria,
+      recomendacionGlucometria: comentario,
+      usuario,
+    });
 
     return await this.glucometrias.save(glucometriaBus);
   }
@@ -142,13 +157,10 @@ export class GlucometriasService {
     const glucometriaBus = await this.glucometrias.findOneBy({ idGlucometria });
 
     if (!glucometriaBus) {
-      throw new HttpException('Esta Glucometria existe', HttpStatus.OK);
+      throw new NotFoundException('Esta Glucometria existe');
     }
     await this.glucometrias.delete(idGlucometria);
-    throw new HttpException(
-      'Glucometria eliminada correctamente',
-      HttpStatus.OK,
-    );
+    return { message: 'Glucometria eliminada correctamente' };
   }
 
   private formatFecha(fechaStr: string): string {

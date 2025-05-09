@@ -26,7 +26,7 @@ export class GlucometriasController {
   @Roles('Paciente')
   create(
     @Body() createGlucometriaDto: CreateGlucometriaDto,
-    @Req() req: Request,
+    @Req() req: Request
   ) {
     const userId = req.user?.sub;
     return this.glucometrias.create(createGlucometriaDto, userId);
@@ -58,8 +58,14 @@ export class GlucometriasController {
   update(
     @Param('idGlucometria') idGlucometria: number,
     @Body() updateGlucometriaDto: UpdateGlucometriaDto,
+    @Req() req: Request
   ) {
-    return this.glucometrias.update(idGlucometria, updateGlucometriaDto);
+    const userId = req.user?.sub;
+    return this.glucometrias.update(
+      idGlucometria,
+      updateGlucometriaDto,
+      userId
+    );
   }
 
   @Delete(':idGlucometria')
