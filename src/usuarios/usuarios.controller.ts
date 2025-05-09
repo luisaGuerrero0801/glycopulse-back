@@ -33,7 +33,7 @@ export class UsuariosController {
   @Patch(':idUsuario')
   update(
     @Param('idUsuario') idUsuario: number,
-    @Body() updateUsuarioDto: UpdateUsuarioDto,
+    @Body() updateUsuarioDto: UpdateUsuarioDto
   ) {
     return this.usuariosService.update(idUsuario, updateUsuarioDto);
   }

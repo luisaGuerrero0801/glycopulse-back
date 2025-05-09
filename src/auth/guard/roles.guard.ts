@@ -14,7 +14,7 @@ export class RolesGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<string[]>(
       ROLES_KEY,
-      [context.getHandler(), context.getClass()],
+      [context.getHandler(), context.getClass()]
     );
 
     if (!requiredRoles) return true;
@@ -23,7 +23,7 @@ export class RolesGuard implements CanActivate {
 
     if (!requiredRoles.includes(user.rol)) {
       throw new ForbiddenException(
-        'No tienes permisos para acceder a esta ruta',
+        'No tienes permisos para acceder a esta ruta'
       );
     }
 
