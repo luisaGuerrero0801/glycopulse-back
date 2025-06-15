@@ -27,7 +27,7 @@ export class Usuario {
   generoUsuario: string;
 
   @Column({ type: 'varchar' })
-  rhUsuario;
+  rhUsuario: string;
 
   @Column({ unique: true, nullable: false })
   correoUsuario: string;
@@ -40,6 +40,10 @@ export class Usuario {
 
   @Column({ nullable: false })
   paisUsuario: string;
+
+  // ✅ Aquí controlamos el estado como 'Activo' o 'Inactivo'
+  @Column({ default: 'Activo' })
+  estado: 'Activo' | 'Inactivo';
 
   @ManyToOne(() => Rol, (rol) => rol.usuarios)
   @JoinColumn({ name: 'idRol' })

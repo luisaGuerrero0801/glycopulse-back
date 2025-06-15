@@ -3,14 +3,19 @@ import { UsuariosService } from './usuarios.service';
 import { UsuariosController } from './usuarios.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Usuario } from './entities/usuario.entity';
-import { RolesModule } from 'src/roles/roles.module';
-import { Repository } from 'typeorm';
 import { Rol } from 'src/roles/entities/rol.entity';
+import { RolesModule } from 'src/roles/roles.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Usuario, Rol]), Repository, RolesModule],
+  imports: [
+    TypeOrmModule.forFeature([Usuario, Rol]),
+    RolesModule, // Importamos el módulo de roles para la relación
+  ],
   controllers: [UsuariosController],
   providers: [UsuariosService],
-  exports: [UsuariosService, TypeOrmModule],
+  exports: [
+    UsuariosService,          // Exportamos para que otros módulos puedan usar el servicio
+    TypeOrmModule,            // También exportamos TypeOrmModule si otros lo requieren
+  ],
 })
 export class UsuariosModule {}

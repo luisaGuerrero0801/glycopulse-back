@@ -24,7 +24,12 @@ export class AuthService {
     );
 
     if (!contraseniaValida) {
-      throw new UnauthorizedException('contraseña invalida');
+      throw new UnauthorizedException('Contraseña inválida');
+    }
+
+    // 🚫 Validar si el usuario está inactivo
+    if (user.estado !== 'Activo') {
+      throw new UnauthorizedException('El usuario está inactivo');
     }
 
     const payload = {
