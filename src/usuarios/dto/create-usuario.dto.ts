@@ -4,6 +4,8 @@ import {
   IsString,
   MinLength,
   IsInt,
+  IsIn,
+  IsOptional
 } from 'class-validator';
 
 export class CreateUsuarioDto {
@@ -54,4 +56,9 @@ export class CreateUsuarioDto {
   @IsNotEmpty()
   @IsInt()
   idRol: number;
+
+  
+  @IsOptional()
+  @IsIn(['Activo', 'Inactivo'])
+  estado?: string;
 }

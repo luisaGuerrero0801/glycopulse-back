@@ -16,7 +16,7 @@ import * as bcryptjs from 'bcryptjs';
 export class UsuariosService {
   constructor(
     @InjectRepository(Usuario) private readonly usuarios: Repository<Usuario>,
-    @InjectRepository(Rol) private readonly roles: Repository<Rol>
+    @InjectRepository(Rol) private readonly roles: Repository<Rol>,
   ) {}
 
   async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
@@ -26,32 +26,19 @@ export class UsuariosService {
 
     if (!rol) throw new NotFoundException('Id de Rol no encontrado');
 
-    const existingUser = await this.findOneByEmail(
-      createUsuarioDto.correoUsuario
-    );
+    const existingUser = await this.findOneByEmail(createUsuarioDto.correoUsuario);
     if (existingUser) {
-      throw new HttpException(
-        'El correo electrónico ya está en uso',
-        HttpStatus.OK
-      );
+      throw new HttpException('El correo electrónico ya está en uso', HttpStatus.OK);
     }
 
     const fechaNacimiento = new Date(createUsuarioDto.fechaNacimientoUsuario);
-
     if (isNaN(fechaNacimiento.getTime())) {
-      throw new HttpException(
-        'La fecha de nacimiento no es válida',
-        HttpStatus.OK
-      );
+      throw new HttpException('La fecha de nacimiento no es válida', HttpStatus.OK);
     }
 
-    const salt = await bcryptjs.genSalt(10); // Generar un salt con 10 rondas de seguridad
-    const hashedPassword = await bcryptjs.hash(
-      createUsuarioDto.contrasenaUsuario,
-      salt
-    ); // Hashear la contraseña
+    const salt = await bcryptjs.genSalt(10);
+    const hashedPassword = await bcryptjs.hash(createUsuarioDto.contrasenaUsuario, salt);
 
-    // Crear el nuevo usuario
     const usuario = this.usuarios.create({
       nombresUsuario: createUsuarioDto.nombresUsuario,
       apellidosUsuario: createUsuarioDto.apellidosUsuario,
@@ -62,6 +49,7 @@ export class UsuariosService {
       ciudadUsuario: createUsuarioDto.ciudadUsuario,
       paisUsuario: createUsuarioDto.paisUsuario,
       fechaNacimientoUsuario: fechaNacimiento,
+      estado: 'Activo',
       rol,
     });
 
@@ -88,7 +76,7 @@ export class UsuariosService {
 
   async update(
     idUsuario: number,
-    updateUsuarioDto: UpdateUsuarioDto
+    updateUsuarioDto: UpdateUsuarioDto,
   ): Promise<Usuario> {
     const usuario = await this.usuarios.findOneBy({ idUsuario });
 
@@ -96,32 +84,21 @@ export class UsuariosService {
       throw new HttpException('Usuario no encontrado', HttpStatus.OK);
     }
 
-    const existingUser = await this.findOneByEmail(
-      updateUsuarioDto.correoUsuario
-    );
-
+    const existingUser = await this.findOneByEmail(updateUsuarioDto.correoUsuario);
     if (existingUser && existingUser.idUsuario !== idUsuario) {
-      throw new HttpException(
-        'El correo electrónico ya está en uso',
-        HttpStatus.OK
-      );
+      throw new HttpException('El correo electrónico ya está en uso', HttpStatus.OK);
     }
 
     const fechaNacimiento = new Date(updateUsuarioDto.fechaNacimientoUsuario);
-
-    // Verificar que la conversión de la fecha es válida
     if (isNaN(fechaNacimiento.getTime())) {
-      throw new HttpException(
-        'La fecha de nacimiento no es válida',
-        HttpStatus.OK
-      );
+      throw new HttpException('La fecha de nacimiento no es válida', HttpStatus.OK);
     }
 
     if (updateUsuarioDto.contrasenaUsuario) {
-      const salt = await bcryptjs.genSalt(10); // Generar un salt
+      const salt = await bcryptjs.genSalt(10);
       updateUsuarioDto.contrasenaUsuario = await bcryptjs.hash(
         updateUsuarioDto.contrasenaUsuario,
-        salt // Hashear la contraseña
+        salt,
       );
     }
 
@@ -143,9 +120,20 @@ export class UsuariosService {
   async remove(idUsuario: number) {
     const usuario = await this.usuarios.findOneBy({ idUsuario });
     if (!usuario) {
-      throw new HttpException('Esta Usuario No existe', HttpStatus.OK);
+      throw new HttpException('Este usuario no existe', HttpStatus.OK);
     }
     await this.usuarios.delete(idUsuario);
     throw new HttpException('Usuario eliminado correctamente', HttpStatus.OK);
+  }
+
+  // ✅ Actualizado para aceptar un booleano
+  async cambiarEstado(idUsuario: number, activo: boolean): Promise<Usuario> {
+    const usuario = await this.usuarios.findOneBy({ idUsuario });
+    if (!usuario) {
+      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    usuario.estado = activo ? 'Activo' : 'Inactivo';
+    return await this.usuarios.save(usuario);
   }
 }
