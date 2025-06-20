@@ -5,17 +5,24 @@ import {
   MinLength,
   IsInt,
   IsIn,
-  IsOptional
+  IsOptional,
+  Matches,
 } from 'class-validator';
 
 export class CreateUsuarioDto {
   @IsString()
   @MinLength(3)
+  @Matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, {
+    message: 'El nombre solo debe contener letras y espacios',
+  })
   @IsNotEmpty()
   nombresUsuario: string;
 
   @IsString()
   @MinLength(3)
+  @Matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, {
+    message: 'El apellido solo debe contener letras y espacios',
+  })
   @IsNotEmpty()
   apellidosUsuario: string;
 
@@ -57,7 +64,6 @@ export class CreateUsuarioDto {
   @IsInt()
   idRol: number;
 
-  
   @IsOptional()
   @IsIn(['Activo', 'Inactivo'])
   estado?: string;
