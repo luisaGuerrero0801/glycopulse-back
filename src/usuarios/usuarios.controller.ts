@@ -34,7 +34,7 @@ export class UsuariosController {
   @Patch(':idUsuario')
   update(
     @Param('idUsuario', ParseIntPipe) idUsuario: number,
-    @Body() updateUsuarioDto: UpdateUsuarioDto,
+    @Body() updateUsuarioDto: UpdateUsuarioDto
   ) {
     return this.usuariosService.update(idUsuario, updateUsuarioDto);
   }
@@ -48,7 +48,7 @@ export class UsuariosController {
   @Patch(':idUsuario/estado')
   cambiarEstado(
     @Param('idUsuario', ParseIntPipe) idUsuario: number,
-    @Body('activo') activo: boolean,
+    @Body('activo') activo: boolean
   ) {
     return this.usuariosService.cambiarEstado(idUsuario, activo);
   }

@@ -56,8 +56,6 @@ export class GlucometriasService {
     const registros = await this.glucometrias.find({ relations: ['usuario'] });
 
     return registros.map((g) => {
-      console.log('Hora recibida:', g.horaGlucometria); // ✅ Confirmar formato
-
       return {
         ...g,
         fechaGlucometria: format(

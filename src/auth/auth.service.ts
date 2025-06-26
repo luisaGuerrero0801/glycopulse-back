@@ -8,7 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthService {
   constructor(
     private readonly usuariosService: UsuariosService,
-    private readonly jwtService: JwtService,
+    private readonly jwtService: JwtService
   ) {}
 
   async login({ correoUsuario, contrasenaUsuario }: LoginDto) {
@@ -20,7 +20,7 @@ export class AuthService {
 
     const contraseniaValida = await bcryptjs.compare(
       contrasenaUsuario,
-      user.contrasenaUsuario,
+      user.contrasenaUsuario
     );
 
     if (!contraseniaValida) {

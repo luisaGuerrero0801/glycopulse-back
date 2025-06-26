@@ -38,7 +38,6 @@ export class AuthGuard implements CanActivate {
       if (!usuario || usuario.estado !== 'Activo') {
         throw new UnauthorizedException('El usuario está inactivo o no existe');
       }
-
     } catch (error) {
       console.error('Error de autenticación:', error.message);
       throw new UnauthorizedException('Token inválido o usuario inactivo');

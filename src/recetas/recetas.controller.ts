@@ -45,7 +45,7 @@ export class RecetasController {
   @Roles('Paciente')
   update(
     @Param('idReceta') idReceta: number,
-    @Body() updateRecetaDto: UpdateRecetaDto,
+    @Body() updateRecetaDto: UpdateRecetaDto
   ) {
     return this.recetasService.update(idReceta, updateRecetaDto);
   }
