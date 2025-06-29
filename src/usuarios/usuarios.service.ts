@@ -16,7 +16,7 @@ import * as bcryptjs from 'bcryptjs';
 export class UsuariosService {
   constructor(
     @InjectRepository(Usuario) private readonly usuarios: Repository<Usuario>,
-    @InjectRepository(Rol) private readonly roles: Repository<Rol>,
+    @InjectRepository(Rol) private readonly roles: Repository<Rol>
   ) {}
 
   async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
@@ -26,7 +26,9 @@ export class UsuariosService {
 
     if (!rol) throw new NotFoundException('Id de Rol no encontrado');
 
-    const existingUser = await this.findOneByEmail(createUsuarioDto.correoUsuario);
+    const existingUser = await this.findOneByEmail(
+      createUsuarioDto.correoUsuario
+    );
     if (existingUser) {
       throw new ConflictException('correo electrónico ya está en uso');
     }
@@ -37,7 +39,10 @@ export class UsuariosService {
     }
 
     const salt = await bcryptjs.genSalt(10);
-    const hashedPassword = await bcryptjs.hash(createUsuarioDto.contrasenaUsuario, salt);
+    const hashedPassword = await bcryptjs.hash(
+      createUsuarioDto.contrasenaUsuario,
+      salt
+    );
 
     const usuario = this.usuarios.create({
       nombresUsuario: createUsuarioDto.nombresUsuario,
@@ -76,7 +81,7 @@ export class UsuariosService {
 
   async update(
     idUsuario: number,
-    updateUsuarioDto: UpdateUsuarioDto,
+    updateUsuarioDto: UpdateUsuarioDto
   ): Promise<Usuario> {
     const usuario = await this.usuarios.findOneBy({ idUsuario });
 
@@ -84,7 +89,9 @@ export class UsuariosService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    const existingUser = await this.findOneByEmail(updateUsuarioDto.correoUsuario);
+    const existingUser = await this.findOneByEmail(
+      updateUsuarioDto.correoUsuario
+    );
     if (existingUser && existingUser.idUsuario !== idUsuario) {
       throw new ConflictException('El correo electrónico ya está en uso');
     }
@@ -98,7 +105,7 @@ export class UsuariosService {
       const salt = await bcryptjs.genSalt(10);
       updateUsuarioDto.contrasenaUsuario = await bcryptjs.hash(
         updateUsuarioDto.contrasenaUsuario,
-        salt,
+        salt
       );
     }
 
@@ -135,5 +142,18 @@ export class UsuariosService {
 
     usuario.estado = activo ? 'Activo' : 'Inactivo';
     return await this.usuarios.save(usuario);
+  }
+
+  async countByRolAndRh() {
+    return this.usuarios
+      .createQueryBuilder('usuario')
+      .select('rol.nombreRol', 'rol')
+      .addSelect('usuario.rhUsuario', 'rh')
+      .addSelect('COUNT(*)', 'cantidad')
+      .innerJoin('usuario.rol', 'rol')
+      .where('usuario.estado = :estado', { estado: 'Activo' })
+      .groupBy('rol.nombreRol')
+      .addGroupBy('usuario.rhUsuario')
+      .getRawMany();
   }
 }

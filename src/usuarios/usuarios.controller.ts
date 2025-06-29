@@ -21,6 +21,11 @@ export class UsuariosController {
     return this.usuariosService.create(createUsuarioDto);
   }
 
+  @Get('conteo-rol-rh')
+  async getCountByRolAndRh() {
+    return this.usuariosService.countByRolAndRh();
+  }
+
   @Get()
   findAll() {
     return this.usuariosService.findAll();
