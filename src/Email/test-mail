@@ -1,0 +1,19 @@
+const enviarCorreo = require('./mailer'); // Asegúrate que esta ruta es correcta
+
+(async () => {
+  try {
+    await enviarCorreo(
+      'zedaldana190@gmail.com', // Puedes usar tu mismo correo para probar
+      '🚀 Prueba de correo desde GlycoPulse',
+      `
+      <h2>¡Hola!</h2>
+      <p>Este es un correo de prueba enviado desde tu backend con Nodemailer + Gmail.</p>
+      <p><strong>Todo funciona correctamente ✅</strong></p>
+      <small>– GlycoPulse</small>
+      `
+    );
+    console.log('✅ Correo enviado correctamente');
+  } catch (err) {
+    console.error('❌ Error al enviar el correo:', err);
+  }
+})();
