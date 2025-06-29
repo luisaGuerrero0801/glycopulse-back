@@ -11,12 +11,16 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Rol } from 'src/roles/entities/rol.entity';
 import * as bcryptjs from 'bcryptjs';
+import enviarCorreo from '../Email/mailer';
 
 @Injectable()
 export class UsuariosService {
   constructor(
-    @InjectRepository(Usuario) private readonly usuarios: Repository<Usuario>,
-    @InjectRepository(Rol) private readonly roles: Repository<Rol>,
+    @InjectRepository(Usuario)
+    private readonly usuarios: Repository<Usuario>,
+
+    @InjectRepository(Rol)
+    private readonly roles: Repository<Rol>,
   ) {}
 
   async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
@@ -28,7 +32,7 @@ export class UsuariosService {
 
     const existingUser = await this.findOneByEmail(createUsuarioDto.correoUsuario);
     if (existingUser) {
-      throw new ConflictException('correo electrónico ya está en uso');
+      throw new ConflictException('Correo electrónico ya está en uso');
     }
 
     const fechaNacimiento = new Date(createUsuarioDto.fechaNacimientoUsuario);
@@ -53,7 +57,21 @@ export class UsuariosService {
       rol,
     });
 
-    return await this.usuarios.save(usuario);
+    const usuarioGuardado = await this.usuarios.save(usuario);
+
+    // ✅ Enviar correo de bienvenida (sin bloquear si falla)
+    try {
+      await enviarCorreo(
+        usuarioGuardado.correoUsuario,
+        'Bienvenido a GlycoPulse',
+        `<p>Hola <strong>${usuarioGuardado.nombresUsuario}</strong>, tu cuenta ha sido creada con éxito. 🎉</p>
+         <p>Gracias por registrarte en <strong>GlycoPulse</strong>.</p>`
+      );
+    } catch (error) {
+      console.error('⚠️ No se pudo enviar el correo de bienvenida:', error.message);
+    }
+
+    return usuarioGuardado;
   }
 
   async findOneByEmail(correoUsuario: string) {
@@ -123,7 +141,6 @@ export class UsuariosService {
       throw new NotFoundException('Este usuario no existe');
     }
     await this.usuarios.delete(idUsuario);
-    // Retorna un mensaje de éxito, no es usual lanzar excepción para éxito
     return { message: 'Usuario eliminado correctamente' };
   }
 
