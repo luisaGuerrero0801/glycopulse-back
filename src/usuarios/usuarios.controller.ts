@@ -21,9 +21,10 @@ export class UsuariosController {
     return this.usuariosService.create(createUsuarioDto);
   }
 
-  // ✅ Ruta específica primero para evitar conflicto con :idUsuario
+
   @Get('conteo-rol-rh')
-  countByRolAndRh() {
+  async getCountByRolAndRh() {
+
     return this.usuariosService.countByRolAndRh();
   }
 
