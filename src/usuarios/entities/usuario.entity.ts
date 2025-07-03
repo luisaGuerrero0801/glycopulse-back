@@ -41,9 +41,13 @@ export class Usuario {
   @Column({ nullable: false })
   paisUsuario: string;
 
-  // ✅ Aquí controlamos el estado como 'Activo' o 'Inactivo'
+  
   @Column({ default: 'Activo' })
   estado: 'Activo' | 'Inactivo';
+
+  //verificación por correo
+  @Column({ default: false })
+  verificado: boolean;
 
   @ManyToOne(() => Rol, (rol) => rol.usuarios)
   @JoinColumn({ name: 'idRol' })

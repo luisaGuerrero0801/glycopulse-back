@@ -21,8 +21,10 @@ export class UsuariosController {
     return this.usuariosService.create(createUsuarioDto);
   }
 
+
   @Get('conteo-rol-rh')
   async getCountByRolAndRh() {
+
     return this.usuariosService.countByRolAndRh();
   }
 
@@ -39,7 +41,7 @@ export class UsuariosController {
   @Patch(':idUsuario')
   update(
     @Param('idUsuario', ParseIntPipe) idUsuario: number,
-    @Body() updateUsuarioDto: UpdateUsuarioDto
+    @Body() updateUsuarioDto: UpdateUsuarioDto,
   ) {
     return this.usuariosService.update(idUsuario, updateUsuarioDto);
   }
@@ -49,11 +51,10 @@ export class UsuariosController {
     return this.usuariosService.remove(idUsuario);
   }
 
-  // ✅ Este endpoint espera un booleano y lo transforma a 'Activo' o 'Inactivo'
   @Patch(':idUsuario/estado')
   cambiarEstado(
     @Param('idUsuario', ParseIntPipe) idUsuario: number,
-    @Body('activo') activo: boolean
+    @Body('activo') activo: boolean,
   ) {
     return this.usuariosService.cambiarEstado(idUsuario, activo);
   }

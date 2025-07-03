@@ -5,17 +5,19 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Usuario } from './entities/usuario.entity';
 import { Rol } from 'src/roles/entities/rol.entity';
 import { RolesModule } from 'src/roles/roles.module';
+import { MailerModule } from 'src/mail/mailer.module'; // ✅ Asegúrate de la ruta
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Usuario, Rol]),
-    RolesModule, // Importamos el módulo de roles para la relación
+    RolesModule,
+    MailerModule, // ✅ Importar el módulo para que funcione el MailerService
   ],
   controllers: [UsuariosController],
   providers: [UsuariosService],
   exports: [
-    UsuariosService,          // Exportamos para que otros módulos puedan usar el servicio
-    TypeOrmModule,            // También exportamos TypeOrmModule si otros lo requieren
+    UsuariosService,
+    TypeOrmModule,
   ],
 })
 export class UsuariosModule {}

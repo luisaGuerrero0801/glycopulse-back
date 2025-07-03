@@ -11,7 +11,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Rol } from 'src/roles/entities/rol.entity';
 import * as bcryptjs from 'bcryptjs';
-import enviarCorreo from '../Email/mailer';
+import { MailerService } from 'src/mail/mailer.service'; // ✅
 
 @Injectable()
 export class UsuariosService {
@@ -21,6 +21,8 @@ export class UsuariosService {
 
     @InjectRepository(Rol)
     private readonly roles: Repository<Rol>,
+
+    private readonly mailerService: MailerService // ✅ inyección
   ) {}
 
   async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
@@ -64,16 +66,15 @@ export class UsuariosService {
 
     const usuarioGuardado = await this.usuarios.save(usuario);
 
-    // ✅ Enviar correo de bienvenida (sin bloquear si falla)
+    // ✅ Enviar correo de verificación con token
     try {
-      await enviarCorreo(
+      const token = await this.mailerService.generateVerificationToken(usuarioGuardado.idUsuario);
+      await this.mailerService.sendVerificationEmail(
         usuarioGuardado.correoUsuario,
-        'Bienvenido a GlycoPulse',
-        `<p>Hola <strong>${usuarioGuardado.nombresUsuario}</strong>, tu cuenta ha sido creada con éxito. 🎉</p>
-         <p>Gracias por registrarte en <strong>GlycoPulse</strong>.</p>`
+        token
       );
     } catch (error) {
-      console.error('⚠️ No se pudo enviar el correo de bienvenida:', error.message);
+      console.error('⚠️ No se pudo enviar el correo de verificación:', error.message);
     }
 
     return usuarioGuardado;
@@ -172,5 +173,17 @@ export class UsuariosService {
       .groupBy('rol.nombreRol')
       .addGroupBy('usuario.rhUsuario')
       .getRawMany();
+  }
+
+
+  async findOneById(id: number): Promise<Usuario | null> {
+    return this.usuarios.findOne({
+      where: { idUsuario: id },
+      relations: ['rol'],
+    });
+  }
+
+  async save(usuario: Usuario): Promise<Usuario> {
+    return await this.usuarios.save(usuario);
   }
 }
