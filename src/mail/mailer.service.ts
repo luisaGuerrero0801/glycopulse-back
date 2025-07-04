@@ -17,7 +17,7 @@ export class MailerService {
       { sub: userId },
       {
         expiresIn: '1d', // Token válido por 24 horas
-      },
+      }
     );
   }
 
@@ -28,7 +28,7 @@ export class MailerService {
     const verificationUrl = `${frontendUrl}/verify?token=${token}`;
     console.log('🔗 Enlace de verificación:', verificationUrl);
 
-  const html = `
+    const html = `
   <!DOCTYPE html>
   <html>
     <head>
@@ -82,8 +82,6 @@ export class MailerService {
     </body>
   </html>
 `;
-
-
 
     try {
       const info = await this.transporter.sendMail({

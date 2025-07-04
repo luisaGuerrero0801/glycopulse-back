@@ -41,7 +41,6 @@ export class Usuario {
   @Column({ nullable: false })
   paisUsuario: string;
 
-  
   @Column({ default: 'Activo' })
   estado: 'Activo' | 'Inactivo';
 

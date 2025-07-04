@@ -68,13 +68,18 @@ export class UsuariosService {
 
     // ✅ Enviar correo de verificación con token
     try {
-      const token = await this.mailerService.generateVerificationToken(usuarioGuardado.idUsuario);
+      const token = await this.mailerService.generateVerificationToken(
+        usuarioGuardado.idUsuario
+      );
       await this.mailerService.sendVerificationEmail(
         usuarioGuardado.correoUsuario,
         token
       );
     } catch (error) {
-      console.error('⚠️ No se pudo enviar el correo de verificación:', error.message);
+      console.error(
+        '⚠️ No se pudo enviar el correo de verificación:',
+        error.message
+      );
     }
 
     return usuarioGuardado;
@@ -174,7 +179,6 @@ export class UsuariosService {
       .addGroupBy('usuario.rhUsuario')
       .getRawMany();
   }
-
 
   async findOneById(id: number): Promise<Usuario | null> {
     return this.usuarios.findOne({
