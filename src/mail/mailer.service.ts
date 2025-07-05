@@ -16,72 +16,33 @@ export class MailerService {
     return this.jwtService.sign(
       { sub: userId },
       {
-        expiresIn: '1d', // Token válido por 24 horas
+        expiresIn: '1d',
       }
     );
   }
 
   async sendVerificationEmail(to: string, token: string) {
-    console.log('📨 Enviando correo a:', to);
-
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     const verificationUrl = `${frontendUrl}/verify?token=${token}`;
-    console.log('🔗 Enlace de verificación:', verificationUrl);
 
     const html = `
-  <!DOCTYPE html>
-  <html>
-    <head>
-      <style>
-        .button {
+      <div style="font-family: Arial, sans-serif;">
+        <h2>Bienvenido a <span style="color: #2563eb;">GlycoPulse</span></h2>
+        <p>Gracias por registrarte. Haz clic en el siguiente botón para verificar tu cuenta:</p>
+        <a href="${verificationUrl}" style="
           display: inline-block;
           padding: 12px 24px;
-          margin-top: 20px;
           font-size: 16px;
-          color: #2563eb !important;
-          background-color: #ffffff;
-          text-decoration: none;
-          border-radius: 6px;
+          color: #2563eb;
+          background-color: #fff;
           border: 2px solid #2563eb;
+          border-radius: 6px;
           font-weight: bold;
-        }
-        .container {
-          font-family: Arial, sans-serif;
-          max-width: 600px;
-          margin: 0 auto;
-          padding: 32px;
-          background-color: #f9f9f9;
-          border-radius: 8px;
-          color: #333;
-          border: 1px solid #e5e7eb;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <h2>Bienvenido a <span style="color: #2563eb;">GlycoPulse</span></h2>
-        <p>Estimado usuario,</p>
-
-        <p>
-          Gracias por registrarse en <strong>GlycoPulse</strong>. Para completar su registro, es necesario verificar su cuenta.
-        </p>
-
-        <p>
-          Por favor, haga clic en el siguiente botón para activar su cuenta:
-        </p>
-
-        <a href="${verificationUrl}" class="button">Activar cuenta</a>
-
-        <p style="margin-top: 30px;">
-          Si usted no solicitó esta cuenta, puede ignorar este mensaje.
-        </p>
-
-        <p>Atentamente,<br />
-        El equipo de GlycoPulse</p>
+          text-decoration: none;
+        ">Activar cuenta</a>
+        <p style="margin-top: 30px;">Si no solicitaste esto, puedes ignorar este mensaje.</p>
       </div>
-    </body>
-  </html>
-`;
+    `;
 
     try {
       const info = await this.transporter.sendMail({
@@ -90,9 +51,45 @@ export class MailerService {
         subject: 'Verificación de cuenta - GlycoPulse',
         html,
       });
-      console.log('✅ Correo enviado:', info.messageId);
+      console.log('✅ Correo de verificación enviado:', info.messageId);
     } catch (error) {
-      console.error('❌ Error al enviar el correo:', error);
+      console.error('❌ Error al enviar correo de verificación:', error);
+    }
+  }
+
+  async sendRecoveryEmail(to: string, token: string) {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const recoveryUrl = `${frontendUrl}/reset-password?token=${token}`;
+
+    const html = `
+      <div style="font-family: Arial, sans-serif;">
+        <h2>Recuperación de contraseña - GlycoPulse</h2>
+        <p>Hemos recibido una solicitud para restablecer tu contraseña.</p>
+        <p>Haz clic en el siguiente botón para continuar:</p>
+        <a href="${recoveryUrl}" style="
+          display: inline-block;
+          padding: 12px 24px;
+          font-size: 16px;
+          color: #fff;
+          background-color: #2563eb;
+          border-radius: 6px;
+          font-weight: bold;
+          text-decoration: none;
+        ">Restablecer contraseña</a>
+        <p style="margin-top: 30px;">Si no solicitaste esto, ignora este mensaje.</p>
+      </div>
+    `;
+
+    try {
+      const info = await this.transporter.sendMail({
+        from: `"GlycoPulse" <${mailerConfig.auth.user}>`,
+        to,
+        subject: 'Recuperación de contraseña - GlycoPulse',
+        html,
+      });
+      console.log('✅ Correo de recuperación enviado:', info.messageId);
+    } catch (error) {
+      console.error('❌ Error al enviar correo de recuperación:', error);
     }
   }
 }

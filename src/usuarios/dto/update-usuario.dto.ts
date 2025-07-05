@@ -57,7 +57,6 @@ export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
   @IsInt()
   idRol?: number;
 
-  
   @IsOptional()
   @IsString()
   estado?: 'Activo' | 'Inactivo';

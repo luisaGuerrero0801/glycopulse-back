@@ -73,4 +73,47 @@ export class AuthService {
       throw new UnauthorizedException('Token inválido o expirado.');
     }
   }
+  async enviarCorreoRecuperacion(correo: string) {
+    const usuario = await this.usuariosService.findOneByEmail(correo);
+    if (!usuario) {
+      // No informamos si existe o no para proteger la privacidad
+      return {
+        message: 'Si el correo está registrado, se enviará un mensaje.',
+      };
+    }
+
+    const token = await this.jwtService.signAsync(
+      { sub: usuario.idUsuario },
+      { expiresIn: '15m', secret: process.env.JWT_SECRET }
+    );
+
+    await this.mailerService.sendRecoveryEmail(usuario.correoUsuario, token);
+
+    return { message: 'Correo de recuperación enviado.' };
+  }
+
+  async resetearContrasena(token: string, nuevaContrasena: string) {
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: process.env.JWT_SECRET,
+      });
+
+      const usuario = await this.usuariosService.findOne(payload.sub);
+      if (!usuario) {
+        throw new UnauthorizedException('Usuario no encontrado');
+      }
+
+      const salt = await bcryptjs.genSalt(10);
+      const hash = await bcryptjs.hash(nuevaContrasena, salt);
+
+      usuario.contrasenaUsuario = hash;
+      await this.usuariosService.save(usuario);
+
+      return { message: 'Contraseña actualizada correctamente' };
+    } catch (error) {
+      console.error('❌ Error al resetear contraseña:', error); // ✅ ahora se usa
+
+      throw new UnauthorizedException('Token inválido o expirado');
+    }
+  }
 }

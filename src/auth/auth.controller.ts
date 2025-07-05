@@ -1,6 +1,8 @@
 import { Body, Controller, Post, Get, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { RecoverAccountDto } from './dto/recover-account.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -16,5 +18,14 @@ export class AuthController {
   @Get('verify')
   verify(@Query('token') token: string) {
     return this.authService.verificarCuenta(token);
+  }
+  @Post('recuperar-cuenta')
+  recuperarCuenta(@Body() dto: RecoverAccountDto) {
+    return this.authService.enviarCorreoRecuperacion(dto.correo);
+  }
+
+  @Post('reset-password')
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetearContrasena(dto.token, dto.nuevaContrasena);
   }
 }
