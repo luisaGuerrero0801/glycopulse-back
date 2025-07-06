@@ -17,7 +17,7 @@ export class RecetasService {
   constructor(
     @InjectRepository(Receta) private readonly recetas: Repository<Receta>,
     @InjectRepository(Categoria)
-    private readonly categorias: Repository<Categoria>,
+    private readonly categorias: Repository<Categoria>
   ) {}
 
   async create(createRecetaDto: CreateRecetaDto) {
@@ -27,7 +27,7 @@ export class RecetasService {
 
     if (categorias.length === 0) {
       throw new NotFoundException(
-        'No se encontraron las categorías especificadas',
+        'No se encontraron las categorías especificadas'
       );
     }
     const receta = this.recetas.create({ ...createRecetaDto, categorias });
@@ -58,7 +58,7 @@ export class RecetasService {
 
     if (categorias.length === 0) {
       throw new NotFoundException(
-        'No se encontraron las categorías especificadas',
+        'No se encontraron las categorías especificadas'
       );
     }
 

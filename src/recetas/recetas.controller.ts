@@ -21,14 +21,14 @@ export class RecetasController {
 
   @Post()
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('Paciente')
+  @Roles('Admin')
   create(@Body() createRecetaDto: CreateRecetaDto) {
     return this.recetasService.create(createRecetaDto);
   }
 
   @Get()
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('Paciente')
+  @Roles('Admin', 'Paciente')
   findAll() {
     return this.recetasService.findAll();
   }
@@ -42,7 +42,7 @@ export class RecetasController {
 
   @Patch(':idReceta')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('Paciente')
+  @Roles('Admin')
   update(
     @Param('idReceta') idReceta: number,
     @Body() updateRecetaDto: UpdateRecetaDto
@@ -52,7 +52,7 @@ export class RecetasController {
 
   @Delete(':idReceta')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('Paciente')
+  @Roles('Admin')
   remove(@Param('idReceta') idReceta: number) {
     return this.recetasService.remove(idReceta);
   }

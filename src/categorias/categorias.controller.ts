@@ -33,7 +33,7 @@ export class CategoriasController {
   @Patch(':idCategoria')
   update(
     @Param('idCategoria') idCategoria: number,
-    @Body() updateCategoriaDto: UpdateCategoriaDto,
+    @Body() updateCategoriaDto: UpdateCategoriaDto
   ) {
     return this.categoriasService.update(idCategoria, updateCategoriaDto);
   }
