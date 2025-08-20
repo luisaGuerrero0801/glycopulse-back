@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { GlucometriasService } from './glucometrias.service';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
@@ -42,7 +43,7 @@ export class GlucometriasController {
   @Get(':idGlucometria')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('Paciente')
-  findOne(@Param('idGlucometria') idGlucometria: number) {
+  findOne(@Param('idGlucometria', ParseIntPipe) idGlucometria: number) {
     return this.glucometrias.findOne(idGlucometria);
   }
   @Get('fecha/:fecha')
@@ -56,7 +57,7 @@ export class GlucometriasController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('Paciente')
   update(
-    @Param('idGlucometria') idGlucometria: number,
+    @Param('idGlucometria', ParseIntPipe) idGlucometria: number,
     @Body() updateGlucometriaDto: UpdateGlucometriaDto,
     @Req() req: Request
   ) {
@@ -71,7 +72,7 @@ export class GlucometriasController {
   @Delete(':idGlucometria')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('Paciente')
-  remove(@Param('idGlucometria') idGlucometria: number) {
+  remove(@Param('idGlucometria', ParseIntPipe) idGlucometria: number) {
     return this.glucometrias.remove(idGlucometria);
   }
 }

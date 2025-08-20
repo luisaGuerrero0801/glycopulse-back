@@ -4,15 +4,14 @@ import { RecetasController } from './recetas.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Receta } from './entities/receta.entity';
 import { Repository } from 'typeorm';
-import { CategoriasModule } from 'src/categorias/categorias.module';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { UsuariosModule } from 'src/usuarios/usuarios.module'; // ✅ Se agrega la importación
+import { Usuario } from 'src/usuarios/entities/usuario.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Receta]),
+    TypeOrmModule.forFeature([Receta, Usuario]),
     Repository,
-    CategoriasModule,
     UsuariosModule, // ✅ Se agrega aquí
   ],
   controllers: [RecetasController],

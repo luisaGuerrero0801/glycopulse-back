@@ -15,9 +15,6 @@ import { MailerModule } from 'src/mail/mailer.module'; // ✅ Asegúrate de la r
   ],
   controllers: [UsuariosController],
   providers: [UsuariosService],
-  exports: [
-    UsuariosService,
-    TypeOrmModule,
-  ],
+  exports: [UsuariosService, TypeOrmModule],
 })
 export class UsuariosModule {}

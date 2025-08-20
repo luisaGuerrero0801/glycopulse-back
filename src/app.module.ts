@@ -3,11 +3,13 @@ import { RecetasModule } from './recetas/recetas.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { CategoriasModule } from './categorias/categorias.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { AuthModule } from './auth/auth.module';
 import { GlucometriasModule } from './glucometrias/glucometrias.module';
 import { RolesModule } from './roles/roles.module';
+import { SeedService } from './seeds/seed.service';
+import { Usuario } from './usuarios/entities/usuario.entity';
+import { Rol } from './roles/entities/rol.entity';
 
 @Module({
   imports: [
@@ -21,14 +23,14 @@ import { RolesModule } from './roles/roles.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
+    TypeOrmModule.forFeature([Usuario, Rol]),
     RecetasModule,
-    CategoriasModule,
     UsuariosModule,
     AuthModule,
     GlucometriasModule,
     RolesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, SeedService],
 })
 export class AppModule {}

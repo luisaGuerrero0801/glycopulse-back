@@ -21,12 +21,8 @@ export class Glucometria {
   @Column({ type: 'int' })
   nivelGlucometria: number;
 
-  @Column({ type: 'text' })
-  recomendacionGlucometria: string;
-
-  @ManyToOne(() => Usuario, (usuario) => usuario.glucometrias, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'usuarios_glucometrias' })
+  //relación con la tabla usuarios
+  @ManyToOne(() => Usuario, (usuario) => usuario.glucometrias)
+  @JoinColumn({ name: 'idUsuario' })
   usuario: Usuario;
 }

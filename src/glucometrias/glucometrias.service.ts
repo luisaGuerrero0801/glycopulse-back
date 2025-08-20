@@ -37,15 +37,10 @@ export class GlucometriasService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    const comentario = this.obtenerComentarioPorNivel(
-      createGlucometriaDto.nivelGlucometria
-    );
-
     const nuevaGlucometria = this.glucometrias.create({
       fechaGlucometria: createGlucometriaDto.fechaGlucometria,
       horaGlucometria: createGlucometriaDto.horaGlucometria,
       nivelGlucometria: createGlucometriaDto.nivelGlucometria,
-      recomendacionGlucometria: comentario,
       usuario,
     });
 
@@ -134,17 +129,11 @@ export class GlucometriasService {
       throw new NotFoundException('Glucometría no encontrada');
     }
 
-    // Obtener el comentario basado en el nivel de glucosa
-    const comentario = this.obtenerComentarioPorNivel(
-      updateGlucometriaDto.nivelGlucometria
-    );
-
     // Asignar los nuevos valores al objeto glucometriaBus
     Object.assign(glucometriaBus, {
       fechaGlucometria: updateGlucometriaDto.fechaGlucometria,
       horaGlucometria: updateGlucometriaDto.horaGlucometria,
       nivelGlucometria: updateGlucometriaDto.nivelGlucometria,
-      recomendacionGlucometria: comentario,
       usuario,
     });
 
@@ -168,17 +157,5 @@ export class GlucometriasService {
       month: 'long',
       year: 'numeric',
     }).format(fecha);
-  }
-
-  private obtenerComentarioPorNivel(nivelGlucometria: number): string {
-    if (nivelGlucometria < 70) {
-      return 'Hipoglucemia: Comer una fuente de glucosa rápida (jugo, azúcar); consultar al médico si es recurrente.';
-    } else if (nivelGlucometria >= 70 && nivelGlucometria <= 99) {
-      return 'Normal: Mantener hábitos saludables (dieta balanceada, ejercicio regular).';
-    } else if (nivelGlucometria >= 100 && nivelGlucometria <= 125) {
-      return 'Glucosa alterada / prediabetes: Cambios en el estilo de vida, control más frecuente; posible consulta con nutricionista.';
-    } else {
-      return 'Diabetes probable: Evaluación médica para diagnóstico formal y posible inicio de tratamiento.';
-    }
   }
 }

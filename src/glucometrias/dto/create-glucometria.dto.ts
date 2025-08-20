@@ -10,11 +10,8 @@ export class CreateGlucometriaDto {
   horaGlucometria: string;
 
   @IsInt()
+  @IsNotEmpty()
   nivelGlucometria: number;
-
-  @IsString()
-  @IsOptional()
-  recomendacionGlucometria: string;
 
   @IsInt()
   @IsOptional()

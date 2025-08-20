@@ -44,6 +44,11 @@ export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
   contrasenaUsuario?: string;
 
   @IsString()
+  @MinLength(9)
+  @IsOptional()
+  celularUsuario: string;
+
+  @IsString()
   @MinLength(4)
   @IsOptional()
   ciudadUsuario?: string;
@@ -60,4 +65,8 @@ export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
   @IsOptional()
   @IsString()
   estado?: 'Activo' | 'Inactivo';
+
+  @IsOptional()
+  @IsInt()
+  idUsuarioResponsable?: number;
 }

@@ -1,7 +1,6 @@
 import { CreateRolDto } from './../../roles/dto/create-role.dto';
 import {
-  ArrayNotEmpty,
-  IsArray,
+  IsInt,
   IsNumber,
   IsOptional,
   IsPositive,
@@ -26,6 +25,11 @@ export class UpdateRecetaDto extends PartialType(CreateRolDto) {
   @IsOptional()
   porcionesReceta?: number;
 
+  @IsNumber()
+  @IsPositive()
+  @IsOptional()
+  caloriasReceta: number;
+
   @IsString()
   @MinLength(1)
   @IsOptional()
@@ -33,7 +37,7 @@ export class UpdateRecetaDto extends PartialType(CreateRolDto) {
 
   @IsString()
   @IsOptional()
-  imagenReceta: string;
+  imagenReceta?: string;
 
   @IsString()
   @MinLength(1)
@@ -41,18 +45,11 @@ export class UpdateRecetaDto extends PartialType(CreateRolDto) {
   nivelReceta?: string;
 
   @IsString()
+  @IsOptional()
   @MinLength(1)
-  @IsOptional()
-  ingredientesReceta?: string;
+  categoriaReceta: string;
 
-  @IsString()
-  @MinLength(1)
   @IsOptional()
-  preparacionReceta?: string;
-
-  @IsArray()
-  @ArrayNotEmpty()
-  @IsOptional()
-  @IsString({ each: true })
-  categoriaReceta?: string[];
+  @IsInt()
+  idUsuario?: number;
 }

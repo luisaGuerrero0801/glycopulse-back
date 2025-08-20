@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Rol } from 'src/roles/entities/rol.entity';
 import { Glucometria } from 'src/glucometrias/entities/glucometria.entity';
+import { Receta } from 'src/recetas/entities/receta.entity';
 
 @Entity()
 export class Usuario {
@@ -35,6 +36,9 @@ export class Usuario {
   @Column({ nullable: false })
   contrasenaUsuario: string;
 
+  @Column({ type: 'varchar' })
+  celularUsuario: string;
+
   @Column({ nullable: false })
   ciudadUsuario: string;
 
@@ -48,10 +52,18 @@ export class Usuario {
   @Column({ default: false })
   verificado: boolean;
 
+  //id usuario responsable DOCTOR
+  @Column({ nullable: true })
+  idUsuarioResponsable?: number;
+
+  //relación con la tabla roles
   @ManyToOne(() => Rol, (rol) => rol.usuarios)
   @JoinColumn({ name: 'idRol' })
   rol: Rol;
 
   @OneToMany(() => Glucometria, (glucometria) => glucometria.usuario)
   glucometrias: Glucometria[];
+
+  @OneToMany(() => Receta, (receta) => receta.usuario)
+  recetas: Receta[];
 }

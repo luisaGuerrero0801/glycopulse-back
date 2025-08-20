@@ -1,10 +1,10 @@
-import { Categoria } from 'src/categorias/entities/categoria.entity';
+import { Usuario } from 'src/usuarios/entities/usuario.entity';
 import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  ManyToMany,
-  JoinTable,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 
 @Entity()
@@ -22,6 +22,9 @@ export class Receta {
   porcionesReceta: number;
 
   @Column()
+  caloriasReceta: number;
+
+  @Column()
   tiempoReceta: string;
 
   @Column()
@@ -30,23 +33,10 @@ export class Receta {
   @Column()
   nivelReceta: string;
 
-  @Column({ type: 'longtext' })
-  ingredientesReceta: string;
+  @Column()
+  categoriaReceta: string;
 
-  @Column({ type: 'longtext' })
-  preparacionReceta: string;
-
-  @ManyToMany(() => Categoria, (categoria) => categoria.recetas, {
-    eager: true,
-  })
-  @JoinTable({
-    name: 'categorias_recetas',
-    joinColumn: {
-      name: 'receta_id',
-    },
-    inverseJoinColumn: {
-      name: 'categoria_id',
-    },
-  })
-  categorias: Categoria[];
+  @ManyToOne(() => Usuario, (usuario) => usuario.recetas)
+  @JoinColumn({ name: 'idUsuario' })
+  usuario: Usuario;
 }

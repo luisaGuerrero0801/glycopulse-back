@@ -6,63 +6,88 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Receta } from './entities/receta.entity';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateRecetaDto } from './dto/create-receta.dto';
 import { UpdateRecetaDto } from './dto/update-receta.dto';
-import { Categoria } from 'src/categorias/entities/categoria.entity';
+import { Usuario } from 'src/usuarios/entities/usuario.entity';
 
 @Injectable()
 export class RecetasService {
   constructor(
     @InjectRepository(Receta) private readonly recetas: Repository<Receta>,
-    @InjectRepository(Categoria)
-    private readonly categorias: Repository<Categoria>
+    @InjectRepository(Usuario) private readonly usuarios: Repository<Usuario>
   ) {}
 
-  async create(createRecetaDto: CreateRecetaDto) {
-    const categorias = await this.categorias.find({
-      where: { nombreCategoria: In(createRecetaDto.categoriaReceta) },
+  async create(
+    createRecetaDto: CreateRecetaDto,
+    userId: string
+  ): Promise<Receta> {
+    const userIdNumber = Number(userId);
+
+    if (isNaN(userIdNumber)) {
+      throw new BadRequestException('El ID de usuario no es válido');
+    }
+
+    const usuario = await this.usuarios.findOne({
+      where: { idUsuario: userIdNumber },
+    });
+    if (!usuario) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const receta = this.recetas.create({
+      nombreReceta: createRecetaDto.nombreReceta,
+      descripcionReceta: createRecetaDto.descripcionReceta,
+      porcionesReceta: createRecetaDto.porcionesReceta,
+      caloriasReceta: createRecetaDto.caloriasReceta,
+      tiempoReceta: createRecetaDto.tiempoReceta,
+      imagenReceta: createRecetaDto.imagenReceta,
+      nivelReceta: createRecetaDto.nivelReceta,
+      categoriaReceta: createRecetaDto.categoriaReceta,
+      usuario,
     });
 
-    if (categorias.length === 0) {
-      throw new NotFoundException(
-        'No se encontraron las categorías especificadas'
-      );
-    }
-    const receta = this.recetas.create({ ...createRecetaDto, categorias });
     return await this.recetas.save(receta);
   }
 
   async findAll() {
-    return await this.recetas.find();
+    return await this.recetas.find({ relations: ['usuario'] });
   }
 
   async findOne(idReceta: number) {
-    return await this.recetas.findOneBy({ idReceta });
+    return await this.recetas.findOne({
+      where: { idReceta },
+      relations: ['usuario'],
+    });
   }
 
-  async update(idReceta: number, updateRecetaDto: UpdateRecetaDto) {
+  async update(
+    idReceta: number,
+    updateRecetaDto: UpdateRecetaDto,
+    userId: string
+  ) {
+    const userIdNumber = Number(userId);
+
+    if (isNaN(userIdNumber)) {
+      throw new BadRequestException('El ID de usuario no es válido');
+    }
+
+    // Buscar la receta que coincida con el id y el userId
     const receta = await this.recetas.findOne({
-      where: { idReceta },
-      relations: ['categorias'],
+      where: {
+        idReceta: idReceta,
+        usuario: { idUsuario: userIdNumber }, // si tienes relación ManyToOne con User
+      },
     });
 
     if (!receta) {
-      throw new BadRequestException('No se encuentra esta receta');
-    }
-
-    const categorias = await this.categorias.find({
-      where: { nombreCategoria: In(updateRecetaDto.categoriaReceta) },
-    });
-
-    if (categorias.length === 0) {
-      throw new NotFoundException(
-        'No se encontraron las categorías especificadas'
+      throw new BadRequestException(
+        'No se encuentra esta receta o no tienes permiso para editarla'
       );
     }
 
-    Object.assign(receta, { ...updateRecetaDto, categorias });
+    Object.assign(receta, updateRecetaDto);
 
     return this.recetas.save(receta);
   }

@@ -70,7 +70,7 @@ export class AuthService {
 
       return { message: '✅ Cuenta verificada con éxito.' };
     } catch (error) {
-      throw new UnauthorizedException('Token inválido o expirado.');
+      throw new UnauthorizedException('Token inválido o expirado.', error);
     }
   }
   async enviarCorreoRecuperacion(correo: string) {

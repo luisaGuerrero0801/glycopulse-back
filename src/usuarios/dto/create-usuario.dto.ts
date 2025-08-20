@@ -51,6 +51,11 @@ export class CreateUsuarioDto {
   contrasenaUsuario: string;
 
   @IsString()
+  @MinLength(9)
+  @IsNotEmpty()
+  celularUsuario: string;
+
+  @IsString()
   @MinLength(4)
   @IsNotEmpty()
   ciudadUsuario: string;
@@ -67,4 +72,8 @@ export class CreateUsuarioDto {
   @IsOptional()
   @IsIn(['Activo', 'Inactivo'])
   estado?: string;
+
+  @IsOptional()
+  @IsInt()
+  idUsuarioResponsable?: number;
 }

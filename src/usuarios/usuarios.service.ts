@@ -57,6 +57,7 @@ export class UsuariosService {
       rhUsuario: createUsuarioDto.rhUsuario,
       correoUsuario: createUsuarioDto.correoUsuario,
       contrasenaUsuario: hashedPassword,
+      celularUsuario: createUsuarioDto.celularUsuario,
       ciudadUsuario: createUsuarioDto.ciudadUsuario,
       paisUsuario: createUsuarioDto.paisUsuario,
       fechaNacimientoUsuario: fechaNacimiento,
