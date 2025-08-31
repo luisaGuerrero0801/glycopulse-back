@@ -16,7 +16,7 @@ import { RolesModule } from './roles/roles.module';
       host: 'localhost',
       port: 3306,
       username: 'root',
-      password: '',
+      password: '1234',
       database: 'glyco',
       autoLoadEntities: true,
       synchronize: true,
