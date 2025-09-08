@@ -29,6 +29,10 @@ export class AuthService {
       throw new UnauthorizedException('Contraseña inválida');
     }
 
+    if (user.estado !== 'Activo') {
+      throw new UnauthorizedException('Usuario inhabilitado');
+    }
+
     // ⛔ No permitir login si no ha verificado su cuenta
     if (!user.verificado) {
       throw new UnauthorizedException(

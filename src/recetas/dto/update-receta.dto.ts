@@ -1,15 +1,22 @@
-import { CreateRolDto } from './../../roles/dto/create-role.dto';
 import {
+  IsArray,
   IsInt,
   IsNumber,
   IsOptional,
   IsPositive,
   IsString,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
+import { OmitType, PartialType } from '@nestjs/mapped-types';
+import { CreateRecetaDto } from './create-receta.dto';
+import { Type } from 'class-transformer';
+import { UpdateIngredientesRecetaDto } from 'src/ingredientes-receta/dto/update-ingredientes-receta.dto';
+import { UpdatePasosRecetaDto } from 'src/pasos-recetas/dto/update-pasos-receta.dto';
 
-export class UpdateRecetaDto extends PartialType(CreateRolDto) {
+export class UpdateRecetaDto extends PartialType(
+  OmitType(CreateRecetaDto, ['ingredientes', 'pasos'] as const)
+) {
   @IsString()
   @MinLength(1)
   @IsOptional()
@@ -28,7 +35,7 @@ export class UpdateRecetaDto extends PartialType(CreateRolDto) {
   @IsNumber()
   @IsPositive()
   @IsOptional()
-  caloriasReceta: number;
+  caloriasReceta?: number;
 
   @IsString()
   @MinLength(1)
@@ -47,9 +54,22 @@ export class UpdateRecetaDto extends PartialType(CreateRolDto) {
   @IsString()
   @IsOptional()
   @MinLength(1)
-  categoriaReceta: string;
+  categoriaReceta?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => UpdateIngredientesRecetaDto)
+  ingredientes?: UpdateIngredientesRecetaDto[];
 
   @IsOptional()
   @IsInt()
   idUsuario?: number;
+
+  //Pasos
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => UpdatePasosRecetaDto)
+  pasos?: UpdatePasosRecetaDto[];
 }
