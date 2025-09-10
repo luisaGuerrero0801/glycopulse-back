@@ -44,6 +44,13 @@ export class RecetasController {
     return this.recetasService.findOne(idReceta);
   }
 
+  @Get('usuario/:idUsuario')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('Doctor', 'Paciente')
+  findRecetaByPaciente(@Param('idUsuario', ParseIntPipe) idUsuario: number) {
+    return this.recetasService.findRecetaByPaciente(idUsuario);
+  }
+
   @Patch(':idReceta')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('Doctor')

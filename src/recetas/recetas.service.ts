@@ -170,6 +170,24 @@ export class RecetasService {
     return receta;
   }
 
+  async findRecetaByPaciente(idUsuario: number) {
+    const recetas = await this.recetas.find({
+      where: { usuario: { idUsuario } },
+      relations: [
+        'usuario',
+        'ingredientes',
+        'ingredientes.ingrediente',
+        'pasos',
+      ],
+    });
+    if (!recetas || recetas.length === 0) {
+      throw new NotFoundException(
+        `No se encontraron recetas para el usuario con ID ${idUsuario}`
+      );
+    }
+    return recetas;
+  }
+
   async update(
     idReceta: number,
     updateRecetaDto: UpdateRecetaDto,

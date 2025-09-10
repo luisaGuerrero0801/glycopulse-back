@@ -77,6 +77,7 @@ export class AuthService {
       throw new UnauthorizedException('Token inválido o expirado.', error);
     }
   }
+
   async enviarCorreoRecuperacion(correo: string) {
     const usuario = await this.usuariosService.findOneByEmail(correo);
     if (!usuario) {

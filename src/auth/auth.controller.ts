@@ -19,6 +19,7 @@ export class AuthController {
   verify(@Query('token') token: string) {
     return this.authService.verificarCuenta(token);
   }
+
   @Post('recuperar-cuenta')
   recuperarCuenta(@Body() dto: RecoverAccountDto) {
     return this.authService.enviarCorreoRecuperacion(dto.correo);
