@@ -5,19 +5,9 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const allowedOrigins = [
-    'http://localhost:5173', // desarrollo local
-    process.env.FRONTEND_URL || '', // producción
-  ];
-
   app.enableCors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('CORS no permitido por el backend'));
-      }
-    },
+    origin: 'https://glycopulse-fronted.onrender.com', // URL de tu frontend
+    credentials: true, // necesario si usas cookies o JWT
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
