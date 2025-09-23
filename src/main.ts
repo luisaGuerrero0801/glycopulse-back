@@ -6,7 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: 'https://glycopulse-fronted.onrender.com', // URL de tu frontend
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173', // URL de tu frontend
     credentials: true, // necesario si usas cookies o JWT
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
