@@ -1,5 +1,3 @@
-import 'dotenv/config';
-
 const mailerConfig = {
   host: process.env.EMAIL_HOST,
   port: Number(process.env.EMAIL_PORT) || 587,
