@@ -4,6 +4,7 @@ import { LoginDto } from './dto/login.dto';
 import * as bcryptjs from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from 'src/mail/mailer.service';
+import { jwtConstants } from './constants';
 
 @Injectable()
 export class AuthService {
@@ -89,7 +90,10 @@ export class AuthService {
 
     const token = await this.jwtService.signAsync(
       { sub: usuario.idUsuario },
-      { expiresIn: '15m', secret: process.env.JWT_SECRET }
+      {
+        expiresIn: '15m',
+        secret: process.env.JWT_SECRET || jwtConstants.secret,
+      }
     );
 
     await this.mailerService.sendRecoveryEmail(usuario.correoUsuario, token);
@@ -100,7 +104,7 @@ export class AuthService {
   async resetearContrasena(token: string, nuevaContrasena: string) {
     try {
       const payload = await this.jwtService.verifyAsync(token, {
-        secret: process.env.JWT_SECRET,
+        secret: process.env.JWT_SECRET || jwtConstants.secret,
       });
 
       const usuario = await this.usuariosService.findOne(payload.sub);
