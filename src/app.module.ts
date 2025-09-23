@@ -22,16 +22,21 @@ import { EstadoSeed } from './seeds/seed-estado.service';
 import { RangoSeed } from './seeds/seed-rango.service';
 import { RecomendacionSeed } from './seeds/seed-recomendaciones.service';
 import { RecomendacionEstadoSeed } from './seeds/seed-recomendaciones-estado.service';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: '1234',
-      database: 'glyco',
+      host: process.env.DB_HOST,
+      port: +process.env.DB_PORT,
+      username: process.env.DB_USER,
+      password: process.env.DB_PASS,
+      database: process.env.DB_NAME,
       autoLoadEntities: true,
       synchronize: true,
     }),
