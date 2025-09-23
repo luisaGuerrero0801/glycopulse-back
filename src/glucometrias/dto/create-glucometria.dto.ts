@@ -1,9 +1,16 @@
-import { IsNotEmpty, IsString, IsInt, IsOptional } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsInt,
+  IsEnum,
+  IsDateString,
+  IsString,
+} from 'class-validator';
+import { MomentoGlucometria } from '../enums/momento-glucometria.enum';
 
 export class CreateGlucometriaDto {
-  @IsString()
+  @IsDateString()
   @IsNotEmpty()
-  fechaGlucometria: string;
+  fechaGlucometria: Date;
 
   @IsString()
   @IsNotEmpty()
@@ -14,6 +21,12 @@ export class CreateGlucometriaDto {
   nivelGlucometria: number;
 
   @IsInt()
-  @IsOptional()
+  @IsNotEmpty()
   idUsuario: number;
+
+  @IsEnum(MomentoGlucometria, {
+    message: `El momento debe ser uno de: ${Object.values(MomentoGlucometria).join(', ')}`,
+  })
+  @IsNotEmpty()
+  momento: MomentoGlucometria;
 }

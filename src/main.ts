@@ -9,7 +9,7 @@ async function bootstrap() {
 
   // Configurar CORS para permitir solicitudes desde localhost:5173
   app.enableCors({
-    origin: 'http://localhost:5173', // Permite solo solicitudes desde tu frontend en localhost:5173
+    origin: 'http://localhost:5174', // Permite solo solicitudes desde tu frontend en localhost:5173
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'], // Métodos HTTP permitidos
     allowedHeaders: ['Content-Type', 'Authorization'], // Cabeceras permitidas
   });

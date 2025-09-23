@@ -9,16 +9,59 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Usuario } from 'src/usuarios/entities/usuario.entity';
 import { Glucometria } from './entities/glucometria.entity';
 import { UpdateGlucometriaDto } from './dto/update-glucometria.dto';
-import { es } from 'date-fns/locale';
-import { format, parseISO } from 'date-fns';
+/**import { es } from 'date-fns/locale';
+import { format, parseISO } from 'date-fns';**/
+import { RangoGlucometria } from 'src/rango-glucometrias/entities/rango-glucometria.entity';
+import { RecomendacionesEstado } from 'src/recomendaciones-estado/entities/recomendaciones-estado.entity';
+import { MomentoGlucometria } from './enums/momento-glucometria.enum';
 
 @Injectable()
 export class GlucometriasService {
   constructor(
-    @InjectRepository(Usuario) private readonly usuarios: Repository<Usuario>,
+    @InjectRepository(Usuario) private readonly usuario: Repository<Usuario>,
+
     @InjectRepository(Glucometria)
-    private readonly glucometrias: Repository<Glucometria>
+    private readonly glucometria: Repository<Glucometria>,
+
+    @InjectRepository(RangoGlucometria)
+    private readonly rango: Repository<RangoGlucometria>,
+
+    @InjectRepository(RecomendacionesEstado)
+    private readonly recomendacionesEstado: Repository<RecomendacionesEstado>
   ) {}
+
+  async analizarGlucometria(nivel: number, momento: MomentoGlucometria) {
+    // Buscar el rango que cumpla con nivel + momento
+    const rango = await this.rango
+      .createQueryBuilder('rango')
+      .leftJoinAndSelect('rango.estado', 'estado')
+      .where('rango.momento = :momento', { momento })
+      .andWhere('rango.min <= :nivel', { nivel })
+      .andWhere('rango.max >= :nivel', { nivel })
+      .getOne();
+
+    if (!rango) {
+      throw new NotFoundException(
+        `No se encontró rango para momento=${momento}, nivel=${nivel}`
+      );
+    }
+
+    // 2️⃣ Buscar recomendaciones asociadas al estado
+    const recomendaciones = await this.recomendacionesEstado.find({
+      where: { estado: { idEstado: rango.estado.idEstado } },
+      relations: ['recomendacion'],
+    });
+
+    return {
+      rango,
+      estado: rango.estado,
+      recomendaciones: recomendaciones.map((r) => ({
+        id: r.recomendacion.idRecomendacion,
+        tipo: r.recomendacion.tipoRecomendacion,
+        descripcion: r.recomendacion.descripcionRecomendacion,
+      })),
+    };
+  }
 
   async create(
     createGlucometriaDto: CreateGlucometriaDto,
@@ -30,25 +73,37 @@ export class GlucometriasService {
       throw new BadRequestException('El ID de usuario no es válido');
     }
 
-    const usuario = await this.usuarios.findOne({
+    const usuario = await this.usuario.findOne({
       where: { idUsuario: userIdNumber },
+      relations: ['rol'],
     });
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    const nuevaGlucometria = this.glucometrias.create({
+    if (usuario.rol?.nombreRol !== 'Paciente') {
+      throw new Error(
+        'Solo se pueden registrar glucometrías para usuarios con rol Paciente'
+      );
+    }
+
+    const analisis = await this.analizarGlucometria(
+      createGlucometriaDto.nivelGlucometria,
+      createGlucometriaDto.momento
+    );
+
+    const nuevaGlucometria = this.glucometria.create({
       fechaGlucometria: createGlucometriaDto.fechaGlucometria,
       horaGlucometria: createGlucometriaDto.horaGlucometria,
       nivelGlucometria: createGlucometriaDto.nivelGlucometria,
       usuario,
     });
 
-    return await this.glucometrias.save(nuevaGlucometria);
+    return await this.glucometria.save(nuevaGlucometria);
   }
 
-  async findAll() {
-    const registros = await this.glucometrias.find({ relations: ['usuario'] });
+  /**async findAll() {
+    const registros = await this.glucometria.find({ relations: ['usuario'] });
 
     return registros.map((g) => {
       return {
@@ -66,7 +121,7 @@ export class GlucometriasService {
   }
 
   async findByFecha(fecha: string) {
-    const glucometriasBuscar = await this.glucometrias.find({
+    const glucometriasBuscar = await this.glucometria.find({
       where: { fechaGlucometria: fecha },
       relations: ['usuario'],
       order: { horaGlucometria: 'ASC' },
@@ -85,7 +140,7 @@ export class GlucometriasService {
   }
 
   async findOne(idGlucometria: number) {
-    const glucometria = await this.glucometrias.findOneBy({ idGlucometria });
+    const glucometria = await this.glucometria.findOneBy({ idGlucometria });
 
     if (!glucometria) {
       throw new NotFoundException('Glucometría no encontrada');
@@ -104,7 +159,7 @@ export class GlucometriasService {
         { locale: es }
       ),
     };
-  }
+  }**/
 
   async update(
     idGlucometria: number,
@@ -117,14 +172,14 @@ export class GlucometriasService {
       throw new BadRequestException('El ID de usuario no es válido');
     }
 
-    const usuario = await this.usuarios.findOne({
+    const usuario = await this.usuario.findOne({
       where: { idUsuario: userIdNumber },
     });
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    const glucometriaBus = await this.glucometrias.findOneBy({ idGlucometria });
+    const glucometriaBus = await this.glucometria.findOneBy({ idGlucometria });
     if (!glucometriaBus) {
       throw new NotFoundException('Glucometría no encontrada');
     }
@@ -137,16 +192,16 @@ export class GlucometriasService {
       usuario,
     });
 
-    return await this.glucometrias.save(glucometriaBus);
+    return await this.glucometria.save(glucometriaBus);
   }
 
   async remove(idGlucometria: number) {
-    const glucometriaBus = await this.glucometrias.findOneBy({ idGlucometria });
+    const glucometriaBus = await this.glucometria.findOneBy({ idGlucometria });
 
     if (!glucometriaBus) {
       throw new NotFoundException('Esta Glucometria existe');
     }
-    await this.glucometrias.delete(idGlucometria);
+    await this.glucometria.delete(idGlucometria);
     return { message: 'Glucometria eliminada correctamente' };
   }
 

@@ -14,5 +14,6 @@ import { Receta } from 'src/recetas/entities/receta.entity';
   ],
   controllers: [IngredientesRecetaController],
   providers: [IngredientesRecetaService],
+  exports: [TypeOrmModule],
 })
 export class IngredientesRecetaModule {}

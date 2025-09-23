@@ -1,6 +1,6 @@
 import {
   Controller,
-  Get,
+  /*Get,*/
   Post,
   Body,
   Patch,
@@ -33,7 +33,7 @@ export class GlucometriasController {
     return this.glucometrias.create(createGlucometriaDto, userId);
   }
 
-  @Get()
+  /**@Get()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('Paciente')
   findAll() {
@@ -51,7 +51,7 @@ export class GlucometriasController {
   @Roles('Paciente')
   findByFecha(@Param('fecha') fecha: string) {
     return this.glucometrias.findByFecha(fecha);
-  }
+  }**/
 
   @Patch(':idGlucometria')
   @UseGuards(AuthGuard, RolesGuard)

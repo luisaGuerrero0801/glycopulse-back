@@ -13,5 +13,6 @@ import { Repository } from 'typeorm';
   ],
   controllers: [IngredientesController],
   providers: [IngredientesService],
+  exports: [TypeOrmModule],
 })
 export class IngredientesModule {}
