@@ -1,7 +1,5 @@
-// main.ts
 import * as dotenv from 'dotenv';
 dotenv.config();
-
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
@@ -9,21 +7,12 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const allowedOrigins = [
-    'http://localhost:5173', // desarrollo local
-    process.env.FRONTEND_URL || '', // producción
-  ];
-
+  // Configurar CORS para permitir solicitudes desde localhost:5173
   app.enableCors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('CORS no permitido por el backend'));
-      }
-    },
-    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: 'http://localhost:5173', // Permite solo solicitudes desde tu frontend en localhost:5173
+    
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'], // Métodos HTTP permitidos
+    allowedHeaders: ['Content-Type', 'Authorization'], // Cabeceras permitidas
   });
 
   app.setGlobalPrefix('api/v1');
@@ -33,9 +22,8 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-    }),
+    })
   );
-
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
