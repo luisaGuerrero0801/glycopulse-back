@@ -1,16 +1,22 @@
-import { CreateRolDto } from './../../roles/dto/create-role.dto';
 import {
-  ArrayNotEmpty,
   IsArray,
+  IsInt,
   IsNumber,
   IsOptional,
   IsPositive,
   IsString,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
+import { OmitType, PartialType } from '@nestjs/mapped-types';
+import { CreateRecetaDto } from './create-receta.dto';
+import { Type } from 'class-transformer';
+import { UpdateIngredientesRecetaDto } from 'src/ingredientes-receta/dto/update-ingredientes-receta.dto';
+import { UpdatePasosRecetaDto } from 'src/pasos-recetas/dto/update-pasos-receta.dto';
 
-export class UpdateRecetaDto extends PartialType(CreateRolDto) {
+export class UpdateRecetaDto extends PartialType(
+  OmitType(CreateRecetaDto, ['ingredientes', 'pasos'] as const)
+) {
   @IsString()
   @MinLength(1)
   @IsOptional()
@@ -26,6 +32,11 @@ export class UpdateRecetaDto extends PartialType(CreateRolDto) {
   @IsOptional()
   porcionesReceta?: number;
 
+  @IsNumber()
+  @IsPositive()
+  @IsOptional()
+  caloriasReceta?: number;
+
   @IsString()
   @MinLength(1)
   @IsOptional()
@@ -33,7 +44,7 @@ export class UpdateRecetaDto extends PartialType(CreateRolDto) {
 
   @IsString()
   @IsOptional()
-  imagenReceta: string;
+  imagenReceta?: string;
 
   @IsString()
   @MinLength(1)
@@ -41,18 +52,24 @@ export class UpdateRecetaDto extends PartialType(CreateRolDto) {
   nivelReceta?: string;
 
   @IsString()
-  @MinLength(1)
   @IsOptional()
-  ingredientesReceta?: string;
-
-  @IsString()
   @MinLength(1)
-  @IsOptional()
-  preparacionReceta?: string;
+  categoriaReceta?: string;
 
+  @IsOptional()
   @IsArray()
-  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => UpdateIngredientesRecetaDto)
+  ingredientes?: UpdateIngredientesRecetaDto[];
+
   @IsOptional()
-  @IsString({ each: true })
-  categoriaReceta?: string[];
+  @IsInt()
+  idUsuario?: number;
+
+  //Pasos
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => UpdatePasosRecetaDto)
+  pasos?: UpdatePasosRecetaDto[];
 }

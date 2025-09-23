@@ -1,10 +1,14 @@
-import { Categoria } from 'src/categorias/entities/categoria.entity';
+import { Usuario } from 'src/usuarios/entities/usuario.entity';
+import { IngredientesReceta } from 'src/ingredientes-receta/entities/ingredientes-receta.entity';
+import { PasosReceta } from 'src/pasos-recetas/entities/pasos-receta.entity';
+
 import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  ManyToMany,
-  JoinTable,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
 } from 'typeorm';
 
 @Entity()
@@ -22,6 +26,9 @@ export class Receta {
   porcionesReceta: number;
 
   @Column()
+  caloriasReceta: number;
+
+  @Column()
   tiempoReceta: string;
 
   @Column()
@@ -30,23 +37,23 @@ export class Receta {
   @Column()
   nivelReceta: string;
 
-  @Column({ type: 'longtext' })
-  ingredientesReceta: string;
+  @Column()
+  categoriaReceta: string;
 
-  @Column({ type: 'longtext' })
-  preparacionReceta: string;
+  @ManyToOne(() => Usuario, (usuario) => usuario.recetas)
+  @JoinColumn({ name: 'idUsuario' })
+  usuario: Usuario;
 
-  @ManyToMany(() => Categoria, (categoria) => categoria.recetas, {
+  @OneToMany(
+    () => IngredientesReceta,
+    (ingredientesReceta) => ingredientesReceta.receta,
+    { cascade: true, eager: true }
+  )
+  ingredientes: IngredientesReceta[];
+
+  @OneToMany(() => PasosReceta, (pasos) => pasos.receta, {
+    cascade: true,
     eager: true,
   })
-  @JoinTable({
-    name: 'categorias_recetas',
-    joinColumn: {
-      name: 'receta_id',
-    },
-    inverseJoinColumn: {
-      name: 'categoria_id',
-    },
-  })
-  categorias: Categoria[];
+  pasos: PasosReceta[];
 }

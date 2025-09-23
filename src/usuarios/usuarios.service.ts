@@ -57,6 +57,7 @@ export class UsuariosService {
       rhUsuario: createUsuarioDto.rhUsuario,
       correoUsuario: createUsuarioDto.correoUsuario,
       contrasenaUsuario: hashedPassword,
+      celularUsuario: createUsuarioDto.celularUsuario,
       ciudadUsuario: createUsuarioDto.ciudadUsuario,
       paisUsuario: createUsuarioDto.paisUsuario,
       fechaNacimientoUsuario: fechaNacimiento,
@@ -85,6 +86,19 @@ export class UsuariosService {
     return usuarioGuardado;
   }
 
+  async countByRolAndRh() {
+    return this.usuarios
+      .createQueryBuilder('usuario')
+      .select('rol.nombreRol', 'rol')
+      .addSelect('usuario.rhUsuario', 'rh')
+      .addSelect('COUNT(*)', 'cantidad')
+      .innerJoin('usuario.rol', 'rol')
+      .where('usuario.estado = :estado', { estado: 'Activo' })
+      .groupBy('rol.nombreRol')
+      .addGroupBy('usuario.rhUsuario')
+      .getRawMany();
+  }
+
   async findOneByEmail(correoUsuario: string) {
     return this.usuarios.findOne({
       where: { correoUsuario },
@@ -96,9 +110,45 @@ export class UsuariosService {
     return await this.usuarios.find({ relations: ['rol'] });
   }
 
+  async buscarDoctores() {
+    return await this.usuarios.find({
+      relations: ['rol'],
+      where: {
+        rol: { nombreRol: 'Doctor' },
+        estado: 'Activo',
+      },
+    });
+  }
+
   async findOne(idUsuario: number) {
     return await this.usuarios.findOne({
       where: { idUsuario },
+      relations: ['rol'],
+    });
+  }
+
+  async getBasicInfo(idUsuario: number) {
+    const usuario = await this.usuarios.findOne({
+      where: { idUsuario },
+      select: [
+        'idUsuario',
+        'nombresUsuario',
+        'apellidosUsuario',
+        'correoUsuario',
+        'estado',
+      ],
+    });
+
+    if (!usuario) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    return usuario;
+  }
+
+  async findPacientesByDoctor(idDoctor: number) {
+    return this.usuarios.find({
+      where: { idUsuarioResponsable: idDoctor },
       relations: ['rol'],
     });
   }
@@ -167,19 +217,6 @@ export class UsuariosService {
     return await this.usuarios.save(usuario);
   }
 
-  async countByRolAndRh() {
-    return this.usuarios
-      .createQueryBuilder('usuario')
-      .select('rol.nombreRol', 'rol')
-      .addSelect('usuario.rhUsuario', 'rh')
-      .addSelect('COUNT(*)', 'cantidad')
-      .innerJoin('usuario.rol', 'rol')
-      .where('usuario.estado = :estado', { estado: 'Activo' })
-      .groupBy('rol.nombreRol')
-      .addGroupBy('usuario.rhUsuario')
-      .getRawMany();
-  }
-
   async findOneById(id: number): Promise<Usuario | null> {
     return this.usuarios.findOne({
       where: { idUsuario: id },
@@ -189,5 +226,34 @@ export class UsuariosService {
 
   async save(usuario: Usuario): Promise<Usuario> {
     return await this.usuarios.save(usuario);
+  }
+
+  async asignarDoctor(idPaciente: number, idDoctor: number) {
+    const paciente = await this.usuarios.findOne({
+      where: { idUsuario: idPaciente },
+      relations: ['rol'],
+    });
+
+    const doctor = await this.usuarios.findOne({
+      where: { idUsuario: idDoctor },
+      relations: ['rol'],
+    });
+
+    if (!paciente) {
+      throw new NotFoundException('Paciente no encontrado');
+    }
+
+    if (!doctor) {
+      throw new NotFoundException('Doctor no encontrado');
+    }
+
+    if (doctor.rol.nombreRol !== 'Doctor') {
+      throw new BadRequestException(
+        `El usuario con ID ${idDoctor} no tiene rol de Doctor`
+      );
+    }
+
+    paciente.idUsuarioResponsable = doctor.idUsuario;
+    return this.usuarios.save(paciente);
   }
 }

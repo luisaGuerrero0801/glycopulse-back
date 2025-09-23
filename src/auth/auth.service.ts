@@ -29,6 +29,10 @@ export class AuthService {
       throw new UnauthorizedException('Contraseña inválida');
     }
 
+    if (user.estado !== 'Activo') {
+      throw new UnauthorizedException('Usuario inhabilitado');
+    }
+
     // ⛔ No permitir login si no ha verificado su cuenta
     if (!user.verificado) {
       throw new UnauthorizedException(
@@ -70,9 +74,10 @@ export class AuthService {
 
       return { message: '✅ Cuenta verificada con éxito.' };
     } catch (error) {
-      throw new UnauthorizedException('Token inválido o expirado.');
+      throw new UnauthorizedException('Token inválido o expirado.', error);
     }
   }
+
   async enviarCorreoRecuperacion(correo: string) {
     const usuario = await this.usuariosService.findOneByEmail(correo);
     if (!usuario) {

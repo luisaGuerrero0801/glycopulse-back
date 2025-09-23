@@ -1,24 +1,34 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateGlucometriaDto } from './create-glucometria.dto';
-import { IsInt, IsOptional, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsInt,
+  IsMilitaryTime,
+  IsOptional,
+} from 'class-validator';
+import { MomentoGlucometria } from '../enums/momento-glucometria.enum';
 
 export class UpdateGlucometriaDto extends PartialType(CreateGlucometriaDto) {
-  @IsString()
+  @IsDateString()
   @IsOptional()
-  fechaGlucometria: string;
+  fechaGlucometria?: Date;
 
-  @IsString()
+  @IsMilitaryTime()
   @IsOptional()
-  horaGlucometria: string;
-
-  @IsInt()
-  nivelGlucometria: number;
-
-  @IsString()
-  @IsOptional()
-  recomendacionGlucometria: string;
+  horaGlucometria?: string;
 
   @IsInt()
   @IsOptional()
-  idUsuario: number;
+  nivelGlucometria?: number;
+
+  @IsInt()
+  @IsOptional()
+  idUsuario?: number;
+
+  @IsEnum(MomentoGlucometria, {
+    message: `El momento debe ser uno de: ${Object.values(MomentoGlucometria).join(', ')}`,
+  })
+  @IsOptional()
+  momento?: MomentoGlucometria;
 }
