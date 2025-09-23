@@ -22,7 +22,8 @@ export class MailerService {
   }
 
   async sendVerificationEmail(to: string, token: string) {
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const frontendUrl =
+      process.env.FRONTEND_URL || 'https://glycopulse-fronted.onrender.com';
     const verificationUrl = `${frontendUrl}/verify?token=${token}`;
 
     const html = `
