@@ -1,6 +1,6 @@
 const mailerConfig = {
   host: process.env.EMAIL_HOST,
-  port: Number(process.env.EMAIL_PORT) || 587,
+  port: Number(process.env.EMAIL_PORT),
   secure: false,
   requireTLS: true,
   auth: {

@@ -19,223 +19,242 @@ export class RecomendacionEstadoSeed {
   async run() {
     const estados = await this.estadoRepo.find();
     const recomendaciones = await this.recRepo.find();
-
     // 🔹 Asociaciones: estado.nombreEstado → recomendaciones que le corresponden
     const asociaciones: Record<string, string[]> = {
       // 🔴 AYUNAS
-      'Hipoglucemia Crítica Ayunas': [
-        'Un nivel de glucosa en ayunas por debajo de 54 mg/dL indica hipoglucemia severa y peligrosa. Requiere atención inmediata.',
+
+      'Hipoglucemia Critica Ayunas': [
+        'Un nivel de glucosa en ayunas por debajo de 54 mg/dL indica una hipoglucemia severa y peligrosa. Si el objetivo es mantener estabilidad, este rango requiere corrección inmediata y atención médica.',
         'Consume carbohidratos de absorción rápida como jugo o glucosa en gel.',
         'Evita totalmente la actividad física.',
         'Bebe agua solo después de estabilizarte.',
         'Repite la medición y acude a urgencias si no mejora.',
       ],
       'Hipoglucemia Ayunas': [
-        'Un valor de glucosa en ayunas entre 54 y 69 mg/dL indica hipoglucemia leve. Debe tratarse rápidamente.',
+        'Un valor de glucosa en ayunas entre 55 y 69 mg/dL indica hipoglucemia leve. Debe corregirse inmediatamente para evitar síntomas.',
         'Ingiere 15 g de carbohidratos rápidos (ej. jugo, caramelos, glucosa) y luego desayuna completo.',
         'No realices ejercicio hasta normalizar los niveles.',
         'Agua simple tras la estabilización.',
         'Vuelve a medir en 15 minutos; si no mejora, busca atención médica.',
       ],
       'Bajo Ayunas': [
-        'Un nivel en ayunas entre 70 y 79 mg/dL está cercano al límite bajo y requiere atención preventiva.',
+        'Un nivel en ayunas entre 70 y 79 mg/dL está cercano al límite bajo. El objetivo es prevenir descensos hacia hipoglucemia.',
         'Incluye fruta o pan integral en el desayuno para estabilizar.',
         'Come algo antes de realizar actividad física.',
         'Bebe agua al despertar para favorecer el equilibrio.',
         'Monitorea la frecuencia; consulta si se repite.',
       ],
       'Óptimo Ayunas': [
-        'Un nivel en ayunas dentro de 80–130 mg/dL refleja un buen control basal.',
+        'Un nivel en ayunas dentro de 80–130 mg/dL refleja un buen control basal. Mantener hábitos para estabilidad.',
         'Desayuna con proteínas y carbohidratos complejos (ej. avena, huevo).',
         'Evita ejercicio intenso antes de comer; actividad ligera está bien.',
         'Agua al despertar y a lo largo del día.',
         'Registra y compara con días previos para detectar tendencias.',
       ],
       'Alto Ayunas': [
-        'Un valor en ayunas de 131–180 mg/dL está por encima del rango recomendado.',
+        'Un valor en ayunas de 131–180 mg/dL está por encima del rango recomendado y sugiere ajuste de hábitos o tratamiento.',
         'Reduce carbohidratos simples en la cena previa y prioriza fibra.',
         'Realiza una caminata ligera tras la cena si es seguro.',
         'Mantén hidratación adecuada antes de dormir y al despertar.',
         'Vigila si es un patrón recurrente y consulta al equipo de salud.',
       ],
       'Hiperglucemia Ayunas': [
-        'Una glucosa en ayunas mayor a 180 mg/dL indica mal control nocturno.',
+        'Una glucosa en ayunas entre 181 y 399 mg/dL indica mal control nocturno; requiere revisión de dieta o medicación.',
         'Evita carbohidratos simples en la cena y distribuye carbohidratos en porciones controladas.',
         'Actividad ligera tras la cena (si no hay contraindicación).',
         'Agua antes de dormir y al despertar; evita bebidas azucaradas.',
         'Si persiste varios días, consulta al profesional que te atiende.',
       ],
-      'Hiperglucemia Crítica Ayunas': [
-        'Un valor mayor a 400 mg/dL en ayunas es una urgencia médica.',
+      'Hiperglucemia Critica Ayunas': [
+        'Un valor mayor o igual a 400 mg/dL en ayunas es una urgencia médica. Requiere evaluación inmediata.',
         'No comer hasta recibir orientación médica; evita carbohidratos.',
         'Evitar ejercicio hasta evaluación médica.',
-        'Mantener hidratación con agua si no hay contraindicación.',
+        'Mantener hidratación con agua si no hay contraindicación; vigilar signos de deshidratación.',
         'Acude a urgencias; puede requerir tratamiento urgente.',
       ],
 
-      // 🟠 PREPRANDIAL
-      'Hipoglucemia Crítica Preprandial': [
-        'Un nivel por debajo de 54 mg/dL antes de comer indica riesgo grave de hipoglucemia severa.',
-        'Consume carbohidratos de absorción rápida antes de ingerir la comida principal.',
-        'Evita esfuerzo físico hasta normalizar la glucemia.',
-        'Hidratación tras la recuperación.',
-        'Si no mejora tras 15 minutos, busca atención médica inmediata.',
+      // 🔹 PREPRANDIAL
+      'Hipoglucemia Critica Preprandial': [
+        'Un nivel de glucosa menor a 54 mg/dL antes de comer indica hipoglucemia grave. Requiere corrección inmediata.',
+        'Consume carbohidratos rápidos antes de la comida (ej. jugo, glucosa en gel).',
+        'Evita actividad física hasta normalizar.',
+        'Agua tras estabilizar niveles.',
+        'Repite la medición y busca ayuda si no mejora.',
       ],
       'Hipoglucemia Preprandial': [
-        'Un nivel de 54–69 mg/dL antes de comer es hipoglucemia leve.',
-        'Ingiere 15 g de carbohidratos de acción rápida antes de comer.',
-        'Suspende ejercicio hasta corregir niveles.',
-        'Agua simple tras la estabilización.',
-        'Mide de nuevo antes de iniciar la comida.',
+        'Una glucosa de 55–69 mg/dL antes de comer es hipoglucemia leve; corrígela antes de iniciar la comida.',
+        'Carbohidratos rápidos y luego la comida habitual con balance de proteínas y fibra.',
+        'No hacer ejercicio previo a la corrección.',
+        'Agua después de normalizar.',
+        'Monitorea la recurrencia y consulta si es frecuente.',
       ],
       'Bajo Preprandial': [
-        'Un rango de 70–79 mg/dL previo a la comida está en el límite bajo.',
-        'Incluye fruta o cereal integral en tu comida.',
-        'Ten precaución con la actividad física previa.',
-        'Agua para acompañar la comida.',
-        'Monitorea la frecuencia de valores bajos antes de comer.',
+        'Un nivel de 70–79 mg/dL antes de comer está cercano a hipoglucemia; iniciar la comida pronto.',
+        'Comienza con carbohidratos complejos para estabilizar.',
+        'No realizar ejercicio en ayunas; comer antes de la actividad.',
+        'Beber agua antes de comer.',
+        'Mide después de la comida para verificar respuesta.',
       ],
       'Óptimo Preprandial': [
-        'Un nivel entre 80–130 mg/dL antes de comer es adecuado.',
-        'Comida equilibrada con proteínas y carbohidratos complejos.',
-        'Puedes realizar actividad ligera antes de la comida.',
-        'Agua antes y durante la comida.',
-        'Registra valores para control de evolución.',
+        'Glucosa 80–130 mg/dL antes de comer refleja buen control; objetivo mantener estabilidad tras ingesta.',
+        'Balancea la comida con fibra, proteínas y carbohidratos controlados.',
+        'Ejercicio ligero después de comer es recomendable.',
+        'Agua antes de la comida para buena digestión y control glucémico.',
+        'Registrar para comparar respuesta postprandial.',
       ],
       'Alto Preprandial': [
-        'Un valor entre 131–180 mg/dL previo a la comida está elevado.',
-        'Disminuye alimentos con carbohidratos simples en la siguiente comida.',
-        'Actividad ligera como caminata antes de comer.',
-        'Hidratación abundante antes y durante la comida.',
-        'Evalúa si este patrón es recurrente.',
+        'Valor de 131–180 mg/dL antes de comer indica elevación; ajustar porciones y composición de la comida.',
+        'Reducir porción de carbohidratos y priorizar vegetales y proteínas.',
+        'Realizar actividad suave tras la comida si es seguro.',
+        'Hidratarse antes y después de la comida.',
+        'Vigila tendencias y ajuste terapéutico si persiste.',
       ],
       'Hiperglucemia Preprandial': [
-        'Mayor a 180 mg/dL antes de la comida indica hiperglucemia significativa.',
-        'Reduce carbohidratos simples y prefiere ensaladas y proteína.',
-        'Caminar 10–15 minutos previo a comer puede ayudar.',
-        'Agua simple; evita bebidas azucaradas.',
-        'Si se repite frecuentemente, consulta al especialista.',
+        'Una glucosa entre 181 y 399 mg/dL antes de comer indica hiperglucemia; requiere revisión de medicación/dieta.',
+        'Evitar azúcares y alimentos con índice glucémico alto en la comida siguiente.',
+        'Ejercicio suave solo si no hay contraindicaciones y no hay cetonas.',
+        'Beber agua; evitar bebidas azucaradas.',
+        'Consultar al equipo de salud si es persistente.',
       ],
-      'Hiperglucemia Crítica Preprandial': [
-        'Un valor mayor a 400 mg/dL antes de la comida es crítico.',
-        'No iniciar la comida hasta recibir orientación médica.',
-        'No realizar ejercicio físico.',
-        'Mantén hidratación con agua mientras recibes atención.',
-        'Acudir de inmediato a urgencias.',
+      'Hiperglucemia Critica Preprandial': [
+        'Glucosa mayor o igual a 400 mg/dL antes de comer es crítica. Requiere atención médica urgente.',
+        'No comer hasta recibir indicaciones médicas.',
+        'Evitar ejercicio; puede empeorar la situación.',
+        'Hidratar con agua si es posible; vigilar signos de descompensación.',
+        'Acude a urgencias de manera inmediata para evaluación y tratamiento.',
       ],
 
-      // 🟡 POSTPRANDIAL
-      'Hipoglucemia Crítica Postprandial': [
-        'Un nivel menor a 54 mg/dL después de comer es muy grave.',
-        'Ingerir carbohidratos de absorción rápida aunque ya hayas comido.',
-        'Evita toda actividad física.',
-        'Agua tras estabilizar niveles.',
-        'Acude a urgencias si no mejora.',
+      // 🔹 POSTPRANDIAL
+      'Hipoglucemia Critica Postprandial': [
+        'Nivel <54 mg/dL tras comer indica hipoglucemia severa; puede deberse a exceso de medicación. Requiere corrección inmediata.',
+        'Toma carbohidratos de acción rápida y un snack ligero (ej. yogurt, pan).',
+        'Suspende ejercicio inmediatamente.',
+        'Beber agua tras estabilizarte.',
+        'Si no mejora, busca ayuda médica; revisa esquema terapéutico.',
       ],
       'Hipoglucemia Postprandial': [
-        'Un valor entre 54–69 mg/dL tras la comida es bajo.',
-        'Añade carbohidratos rápidos extra.',
-        'Evita ejercicio físico tras la comida.',
-        'Bebe agua al estabilizarte.',
-        'Monitorea evolución cada 15 minutos.',
+        'Glucosa 55–69 mg/dL tras la comida indica hipoglucemia leve; corrige y observa.',
+        'Carbohidratos rápidos y luego una proteína ligera.',
+        'Evita actividad física inmediata.',
+        'Agua tras estabilizar.',
+        'Monitorea recurrencia; revisa dosis si es frecuente.',
       ],
       'Bajo Postprandial': [
-        'Un nivel entre 70–79 mg/dL después de comer es bajo.',
-        'Añade un pequeño snack saludable.',
-        'Precaución con actividad física posterior.',
-        'Agua para mantener equilibrio.',
-        'Consulta si se repite con frecuencia.',
+        'Nivel 70–79 mg/dL tras comer en límite bajo; ajustar composición de comidas para evitar descensos.',
+        'Incorpora más carbohidratos complejos y proteína en comidas.',
+        'Evita ejercicio inmediato; espera a estabilizarte.',
+        'Mantén hidratación con agua.',
+        'Vigila y registra si ocurre con frecuencia.',
       ],
       'Óptimo Postprandial': [
-        'Un rango de 80–140 mg/dL después de comer es adecuado.',
-        'Alimentos balanceados en siguientes comidas.',
-        'Caminata ligera puede ser beneficiosa.',
-        'Agua tras la comida.',
-        'Registra valores para control personal.',
+        'Glucosa <180 mg/dL tras comer refleja buen control postprandial; mantener porciones y actividad leve.',
+        'Mantén porciones moderadas y fibra para controlar el pico glucémico.',
+        'Caminata ligera (10–20 min) ayuda a controlar el pico.',
+        'Agua durante y después de la comida.',
+        'Registra valores postprandiales para comparar con objetivos.',
       ],
       'Alto Postprandial': [
-        'Un nivel entre 141–199 mg/dL tras comer es elevado.',
-        'Reduce porciones de carbohidratos simples en próximas comidas.',
-        'Realiza actividad ligera postcomida.',
-        'Hidratación adecuada después de comer.',
-        'Vigilar tendencia; si es frecuente, ajustar plan alimenticio.',
+        'Glucosa 180–250 mg/dL tras comer está elevada; revisar composición de la comida y el manejo.',
+        'Reducir azúcares y harinas refinadas; aumentar fibra y proteína.',
+        'Realizar caminata de 10–20 minutos después de comer si es seguro.',
+        'Hidratarse con agua; evitar bebidas azucaradas.',
+        'Registrar y consultar si se repite como patrón.',
       ],
       'Hiperglucemia Postprandial': [
-        'Un valor mayor a 200 mg/dL después de comer indica hiperglucemia.',
-        'Limitar carbohidratos simples; preferir vegetales y proteínas.',
-        'Caminata de 15 minutos tras la comida puede ayudar.',
-        'Agua sin azúcar tras la comida.',
-        'Consultar con especialista si es repetitivo.',
+        'Glucosa >250 mg/dL tras la comida es muy alta; requiere medidas para evitar complicaciones.',
+        'Evitar postres y bebidas azucaradas; optar por proteína y verdura.',
+        'Ejercicio suave solo si no hay cetonas y está indicado por tu médico.',
+        'Agua abundante si no hay contraindicación.',
+        'Consulta médica si persiste o aumenta.',
       ],
-      'Hiperglucemia Crítica Postprandial': [
-        'Un nivel mayor a 400 mg/dL tras la comida es una urgencia.',
-        'No ingerir más comida hasta estabilizarte.',
-        'Suspender toda actividad física.',
-        'Solo agua mientras recibes atención.',
-        'Acude inmediatamente a urgencias.',
+      'Hiperglucemia Critica Postprandial': [
+        'Glucosa postprandial >400 mg/dL es crítica; debe evaluarse de inmediato.',
+        'No ingerir más alimentos hasta recibir indicaciones.',
+        'Evitar ejercicio; acude a urgencias si hay síntomas severos.',
+        'Hidratación con agua si la toleras; vigila signos de deshidratación.',
+        'Acude a urgencias para evaluación y tratamiento.',
       ],
 
-      // 🌙 OTROS (Ayuno nocturno, antes de dormir, madrugada)
-      'Hipoglucemia Crítica Otros': [
-        'Un valor menor a 54 mg/dL en la madrugada o antes de dormir es muy grave.',
-        'Consumir carbohidratos de absorción rápida.',
-        'Evita dormir hasta que se normalice.',
-        'Agua después de estabilizarte.',
-        'Busca atención urgente si no mejora.',
+      // 🔹 OTROS MOMENTOS (CORREGIDO - sin "Otros" en el nombre)
+      'Hipoglucemia Critica': [
+        'Nivel <54 mg/dL fuera de comidas es hipoglucemia severa y peligrosa; atención inmediata.',
+        'Consume carbohidratos de rápida absorción (jugo, glucosa) y espera estabilizar.',
+        'Suspende cualquier actividad física hasta normalizar.',
+        'Beber agua solo después de estabilizarte.',
+        'Mide y acude a urgencias si no mejora.',
       ],
-      'Hipoglucemia Otros': [
-        'Un rango de 54–69 mg/dL durante la noche es bajo.',
-        'Consumir carbohidratos rápidos como jugo o galletas.',
-        'No realizar actividad física nocturna.',
-        'Agua simple tras estabilización.',
-        'Revisar de nuevo en 15 minutos.',
+      // eslint-disable-next-line prettier/prettier
+      'Hipoglucemia': [
+        'Valor 54–69 mg/dL fuera de comidas indica hipoglucemia leve; corregir para evitar síntomas.',
+        'Ingiere 15 g de carbohidratos rápidos y luego un snack proteico si es necesario.',
+        'Evitar actividad intensa hasta normalizar.',
+        'Agua tras la corrección.',
+        'Mide de nuevo en 15 minutos.',
       ],
-      'Bajo Otros': [
-        'Un nivel de 70–79 mg/dL en la madrugada es bajo.',
-        'Snack ligero con carbohidratos complejos antes de dormir.',
-        'Precaución si haces actividad física nocturna.',
-        'Mantener hidratación antes de dormir.',
-        'Consulta si el patrón se repite.',
+      // eslint-disable-next-line prettier/prettier
+      'Bajo': [
+        'Nivel 70–79 mg/dL fuera de comidas está cercano al límite; prevenir descenso a hipoglucemia.',
+        'Incluye un snack con carbohidratos complejos y proteína si vas a estar activo.',
+        'Come algo antes de actividad prolongada o intensa.',
+        'Mantén hidratación con agua de manera moderada.',
+        'Monitorea y consulta si se repite con frecuencia nocturna.',
       ],
-      'Óptimo Otros': [
-        'Un nivel entre 80–130 mg/dL en la noche es adecuado.',
-        'Cena balanceada antes de dormir.',
-        'Actividad ligera antes de acostarse está bien.',
-        'Agua antes de dormir.',
-        'Registrar evolución de niveles nocturnos.',
+      // eslint-disable-next-line prettier/prettier
+      'Óptimo': [
+        'Valor 80–130 mg/dL en controles intermedios indica buen control; mantén hábitos saludables.',
+        'Mantén comidas y snacks balanceados según horario y actividad.',
+        'Actividad regular moderada ayuda a mantener estabilidad.',
+        'Hidratarse a lo largo del día; evita bebidas azucaradas.',
+        'Registra valores y compáralos por horarios para detectar patrones.',
       ],
-      'Alto Otros': [
-        'Un valor entre 131–180 mg/dL antes de dormir es elevado.',
-        'Evita carbohidratos simples en la cena.',
-        'Caminar tras la cena puede ayudar.',
-        'Mantén hidratación con agua.',
-        'Consulta si los valores son frecuentes.',
+      // eslint-disable-next-line prettier/prettier
+      'Alto': [
+        'Valor 131–180 mg/dL fuera de comidas indica elevación; revisar alimentación previa y medicación.',
+        'Evitar meriendas altas en carbohidratos simples.',
+        'Actividad ligera puede ayudar si está indicado.',
+        'Mantener hidratación; vigilar si hay sed excesiva.',
+        'Registrar y comentar con el equipo de salud si es frecuente.',
       ],
-      'Hiperglucemia Otros': [
-        'Un nivel mayor a 180 mg/dL en la madrugada o al dormir indica mal control.',
-        'Evita comidas nocturnas con azúcar.',
-        'Actividad ligera después de la cena puede ayudar.',
-        'Agua sin azúcar antes de dormir.',
-        'Si ocurre seguido, acudir al médico.',
+      // eslint-disable-next-line prettier/prettier
+      'Hiperglucemia': [
+        'Valor >180 mg/dL fuera de comidas indica mal control; requiere ajuste y seguimiento.',
+        'Evitar snacks azucarados; priorizar opciones con fibra y proteína.',
+        'Ejercicio suave si no hay contraindicación y no hay cetonas.',
+        'Beber agua frecuentemente; evitar bebidas azucaradas.',
+        'Consultar al profesional si persiste varios días.',
       ],
-      'Hiperglucemia Crítica Otros': [
-        'Un valor mayor a 400 mg/dL en la noche es crítico.',
-        'No ingerir más comida.',
-        'No realizar actividad física.',
-        'Mantén hidratación solo con agua.',
-        'Acude a urgencias de inmediato.',
+      'Hiperglucemia Critica': [
+        'Nivel >400 mg/dL fuera de comidas es crítico. Requiere evaluación urgente.',
+        'No ingerir alimentos hasta recibir indicaciones médicas.',
+        'Evitar ejercicio; acudir a urgencias.',
+        'Hidratación con agua si es posible; vigilar signos de descompensación.',
+        'Acude a urgencias de forma inmediata.',
       ],
     };
 
+    let contadorAsociaciones = 0;
+    let contadorNoEncontradas = 0;
+
     for (const [nombreEstado, textos] of Object.entries(asociaciones)) {
       const estado = estados.find((e) => e.nombreEstado === nombreEstado);
-      if (!estado) continue;
+
+      if (!estado) {
+        console.log(`❌ No se encontró el estado: "${nombreEstado}"`);
+        continue;
+      }
 
       for (const texto of textos) {
         const recomendacion = recomendaciones.find(
           (r) => r.descripcionRecomendacion === texto
         );
-        if (!recomendacion) continue;
+
+        if (!recomendacion) {
+          console.log(
+            `❌ No se encontró recomendación para: "${texto.substring(0, 50)}..."`
+          );
+          contadorNoEncontradas++;
+          continue;
+        }
 
         const existe = await this.recEstadoRepo.findOne({
           where: {
@@ -248,10 +267,18 @@ export class RecomendacionEstadoSeed {
           await this.recEstadoRepo.save(
             this.recEstadoRepo.create({ estado, recomendacion })
           );
+          contadorAsociaciones++;
         }
       }
     }
 
-    console.log('✅ Asociaciones Estado ↔ Recomendaciones insertadas');
+    console.log(
+      `✅ ${contadorAsociaciones} asociaciones Estado ↔ Recomendaciones insertadas`
+    );
+    if (contadorNoEncontradas > 0) {
+      console.log(
+        `⚠️  ${contadorNoEncontradas} recomendaciones no encontradas`
+      );
+    }
   }
 }

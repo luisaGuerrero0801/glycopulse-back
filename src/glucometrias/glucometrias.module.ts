@@ -10,9 +10,20 @@ import { RangoGlucometria } from 'src/rango-glucometrias/entities/rango-glucomet
 import { RangoGlucometriasModule } from 'src/rango-glucometrias/rango-glucometrias.module';
 import { RecomendacionesEstadoModule } from 'src/recomendaciones-estado/recomendaciones-estado.module';
 import { RecomendacionesEstado } from 'src/recomendaciones-estado/entities/recomendaciones-estado.entity';
+import { AuthGuard } from 'src/auth/guard/auth.guard';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        secret: config.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '1h' },
+      }),
+    }),
     TypeOrmModule.forFeature([
       Glucometria,
       Usuario,
@@ -23,9 +34,10 @@ import { RecomendacionesEstado } from 'src/recomendaciones-estado/entities/recom
     UsuariosModule,
     RangoGlucometriasModule,
     RecomendacionesEstadoModule,
+    ConfigModule,
   ],
   controllers: [GlucometriasController],
-  providers: [GlucometriasService],
+  providers: [GlucometriasService, AuthGuard],
   exports: [GlucometriasService, TypeOrmModule],
 })
 export class GlucometriasModule {}

@@ -33,26 +33,6 @@ export class GlucometriasController {
     return this.glucometrias.create(createGlucometriaDto, userId);
   }
 
-  /**@Get()
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('Paciente')
-  findAll() {
-    return this.glucometrias.findAll();
-  }
-
-  @Get(':idGlucometria')
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('Paciente')
-  findOne(@Param('idGlucometria', ParseIntPipe) idGlucometria: number) {
-    return this.glucometrias.findOne(idGlucometria);
-  }
-  @Get('fecha/:fecha')
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('Paciente')
-  findByFecha(@Param('fecha') fecha: string) {
-    return this.glucometrias.findByFecha(fecha);
-  }**/
-
   @Patch(':idGlucometria')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('Paciente')

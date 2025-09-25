@@ -1,5 +1,6 @@
 import { EstadoGlucometria } from 'src/estado-glucometria/entities/estado-glucometria.entity';
 import { Glucometria } from 'src/glucometrias/entities/glucometria.entity';
+import { MomentoGlucometria } from 'src/glucometrias/enums/momento-glucometria.enum';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -22,6 +23,12 @@ export class RangoGlucometria {
 
   @Column({ type: 'int' })
   valorMaxRango: number;
+
+  @Column({
+    type: 'enum',
+    enum: MomentoGlucometria,
+  })
+  momento: MomentoGlucometria;
 
   @ManyToOne(() => EstadoGlucometria, (estado) => estado.rangos, {
     eager: true,

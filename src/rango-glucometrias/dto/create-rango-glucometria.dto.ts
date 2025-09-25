@@ -1,4 +1,5 @@
-import { IsInt, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsInt, IsNotEmpty, IsString } from 'class-validator';
+import { MomentoGlucometria } from 'src/glucometrias/enums/momento-glucometria.enum';
 
 export class CreateRangoGlucometriaDto {
   @IsString()
@@ -16,4 +17,8 @@ export class CreateRangoGlucometriaDto {
   @IsInt()
   @IsNotEmpty()
   idEstado: number;
+
+  @IsEnum(MomentoGlucometria)
+  @IsNotEmpty()
+  momento: MomentoGlucometria;
 }

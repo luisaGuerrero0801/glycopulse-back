@@ -12,8 +12,8 @@ import { UpdateGlucometriaDto } from './dto/update-glucometria.dto';
 /**import { es } from 'date-fns/locale';
 import { format, parseISO } from 'date-fns';**/
 import { RangoGlucometria } from 'src/rango-glucometrias/entities/rango-glucometria.entity';
-import { RecomendacionesEstado } from 'src/recomendaciones-estado/entities/recomendaciones-estado.entity';
 import { MomentoGlucometria } from './enums/momento-glucometria.enum';
+import { ResponseGlucometriaDto } from './dto/response-glucometria.dto';
 
 @Injectable()
 export class GlucometriasService {
@@ -24,41 +24,78 @@ export class GlucometriasService {
     private readonly glucometria: Repository<Glucometria>,
 
     @InjectRepository(RangoGlucometria)
-    private readonly rango: Repository<RangoGlucometria>,
-
-    @InjectRepository(RecomendacionesEstado)
-    private readonly recomendacionesEstado: Repository<RecomendacionesEstado>
+    private readonly rango: Repository<RangoGlucometria>
   ) {}
 
-  async analizarGlucometria(nivel: number, momento: MomentoGlucometria) {
+  private async analizarGlucometria(
+    nivel: number,
+    momento: MomentoGlucometria
+  ) {
     // Buscar el rango que cumpla con nivel + momento
     const rango = await this.rango
       .createQueryBuilder('rango')
       .leftJoinAndSelect('rango.estado', 'estado')
+      .leftJoinAndSelect('estado.recomendaciones', 'recomendacionesEstado')
+      .leftJoinAndSelect('recomendacionesEstado.recomendacion', 'recomendacion')
       .where('rango.momento = :momento', { momento })
-      .andWhere('rango.min <= :nivel', { nivel })
-      .andWhere('rango.max >= :nivel', { nivel })
+      .andWhere(':nivel BETWEEN rango.valorMinRango AND rango.valorMaxRango', {
+        nivel,
+      })
       .getOne();
 
     if (!rango) {
       throw new NotFoundException(
-        `No se encontró rango para momento=${momento}, nivel=${nivel}`
+        `No se encontró rango para el nivel ${nivel} y momento ${momento}`
       );
     }
-
-    // 2️⃣ Buscar recomendaciones asociadas al estado
-    const recomendaciones = await this.recomendacionesEstado.find({
-      where: { estado: { idEstado: rango.estado.idEstado } },
-      relations: ['recomendacion'],
-    });
 
     return {
       rango,
       estado: rango.estado,
+      recomendaciones: rango.estado.recomendaciones.map(
+        (re) => re.recomendacion
+      ),
+    };
+  }
+
+  private toResponseDto(
+    glucometria: Glucometria,
+    rango: RangoGlucometria,
+    estado,
+    recomendaciones
+  ): ResponseGlucometriaDto {
+    return {
+      idGlucometria: glucometria.idGlucometria,
+      fechaGlucometria: glucometria.fechaGlucometria,
+      horaGlucometria: glucometria.horaGlucometria,
+      nivelGlucometria: glucometria.nivelGlucometria,
+      momento: glucometria.momento,
+      usuario: {
+        idUsuario: glucometria.usuario.idUsuario,
+        nombres: glucometria.usuario.nombresUsuario,
+        apellidos: glucometria.usuario.apellidosUsuario,
+        correo: glucometria.usuario.correoUsuario,
+        rol: {
+          idRol: glucometria.usuario.rol.idRol,
+          nombreRol: glucometria.usuario.rol.nombreRol,
+        },
+      },
+      rango: {
+        idRango: rango.idRango,
+        nombreRango: rango.nombreRango,
+        valorMinRango: rango.valorMinRango,
+        valorMaxRango: rango.valorMaxRango,
+        momento: rango.momento,
+      },
+      estado: {
+        idEstado: estado.idEstado,
+        nombreEstado: estado.nombreEstado,
+        descripcionEstado: estado.descripcionEstado,
+      },
       recomendaciones: recomendaciones.map((r) => ({
-        id: r.recomendacion.idRecomendacion,
-        tipo: r.recomendacion.tipoRecomendacion,
-        descripcion: r.recomendacion.descripcionRecomendacion,
+        idRecomendacion: r.idRecomendacion,
+        tipoRecomendacion: r.tipoRecomendacion,
+        descripcionRecomendacion: r.descripcionRecomendacion,
       })),
     };
   }
@@ -66,7 +103,7 @@ export class GlucometriasService {
   async create(
     createGlucometriaDto: CreateGlucometriaDto,
     userId: string
-  ): Promise<Glucometria> {
+  ): Promise<ResponseGlucometriaDto> {
     const userIdNumber = Number(userId);
 
     if (isNaN(userIdNumber)) {
@@ -87,7 +124,7 @@ export class GlucometriasService {
       );
     }
 
-    const analisis = await this.analizarGlucometria(
+    const { rango, estado, recomendaciones } = await this.analizarGlucometria(
       createGlucometriaDto.nivelGlucometria,
       createGlucometriaDto.momento
     );
@@ -96,70 +133,15 @@ export class GlucometriasService {
       fechaGlucometria: createGlucometriaDto.fechaGlucometria,
       horaGlucometria: createGlucometriaDto.horaGlucometria,
       nivelGlucometria: createGlucometriaDto.nivelGlucometria,
+      momento: createGlucometriaDto.momento,
       usuario,
+      rango,
     });
 
-    return await this.glucometria.save(nuevaGlucometria);
+    const glucoGuardada = await this.glucometria.save(nuevaGlucometria);
+
+    return this.toResponseDto(glucoGuardada, rango, estado, recomendaciones);
   }
-
-  /**async findAll() {
-    const registros = await this.glucometria.find({ relations: ['usuario'] });
-
-    return registros.map((g) => {
-      return {
-        ...g,
-        fechaGlucometria: format(
-          parseISO(g.fechaGlucometria),
-          'EEE dd MMM yyyy',
-          { locale: es }
-        ),
-        hora: format(new Date(`1970-01-01T${g.horaGlucometria}`), 'HH:mm', {
-          locale: es,
-        }),
-      };
-    });
-  }
-
-  async findByFecha(fecha: string) {
-    const glucometriasBuscar = await this.glucometria.find({
-      where: { fechaGlucometria: fecha },
-      relations: ['usuario'],
-      order: { horaGlucometria: 'ASC' },
-    });
-
-    if (glucometriasBuscar.length === 0) {
-      throw new NotFoundException(
-        ' No se encontraron glucometrias para esta fecha'
-      );
-    }
-
-    return glucometriasBuscar.map((g) => ({
-      ...g,
-      fechaGlucometria: this.formatFecha(g.fechaGlucometria),
-    }));
-  }
-
-  async findOne(idGlucometria: number) {
-    const glucometria = await this.glucometria.findOneBy({ idGlucometria });
-
-    if (!glucometria) {
-      throw new NotFoundException('Glucometría no encontrada');
-    }
-
-    return {
-      ...glucometria,
-      fechaGlucometria: format(
-        parseISO(glucometria.fechaGlucometria),
-        'EEE dd MMM yyyy',
-        { locale: es }
-      ),
-      hora: format(
-        new Date(`1970-01-01T${glucometria.horaGlucometria}`),
-        'HH:mm',
-        { locale: es }
-      ),
-    };
-  }**/
 
   async update(
     idGlucometria: number,

@@ -1,0 +1,40 @@
+import { MomentoGlucometria } from '../enums/momento-glucometria.enum';
+
+export class ResponseGlucometriaDto {
+  idGlucometria: number;
+  fechaGlucometria: Date;
+  horaGlucometria: string;
+  nivelGlucometria: number;
+  momento: MomentoGlucometria;
+
+  usuario: {
+    idUsuario: number;
+    nombres: string;
+    apellidos: string;
+    correo: string;
+    rol: {
+      idRol: number;
+      nombreRol: string;
+    };
+  };
+
+  rango: {
+    idRango: number;
+    nombreRango: string;
+    valorMinRango: number;
+    valorMaxRango: number;
+    momento: MomentoGlucometria;
+  };
+
+  estado: {
+    idEstado: number;
+    nombreEstado: string;
+    descripcionEstado: string;
+  };
+
+  recomendaciones: {
+    idRecomendacion: number;
+    tipoRecomendacion: string;
+    descripcionRecomendacion: string;
+  }[];
+}
