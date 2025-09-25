@@ -7,166 +7,142 @@ import { EstadoGlucometria } from 'src/estado-glucometria/entities/estado-glucom
 export class EstadoSeed {
   constructor(
     @InjectRepository(EstadoGlucometria)
-    private estadoRepo: Repository<EstadoGlucometria>
+    private readonly estadoRepo: Repository<EstadoGlucometria>
   ) {}
 
   async run() {
     const estados = [
+      // 🔹 Ayunas
       {
-        nombreEstado: 'Óptimo Ayunas',
-        descripcionEstado:
-          'Valor dentro del rango recomendado en ayunas; indica buen control basal.',
-      },
-      {
-        nombreEstado: 'Bajo Ayunas',
-        descripcionEstado:
-          'Valor ligeramente por debajo del rango ideal en ayunas; riesgo de descender a hipoglucemia.',
+        nombreEstado: 'Hipoglucemia Critica Ayunas',
+        descripcionEstado: 'Glucosa <54 mg/dL en ayunas',
       },
       {
         nombreEstado: 'Hipoglucemia Ayunas',
-        descripcionEstado:
-          'Nivel peligrosamente bajo en ayunas, requiere corrección inmediata.',
+        descripcionEstado: 'Glucosa 54–69 mg/dL en ayunas',
       },
       {
-        nombreEstado: 'Hipoglucemia Critica Ayunas',
-        descripcionEstado:
-          'Nivel extremadamente bajo riesgo severo, requiere atención inmediata.',
+        nombreEstado: 'Bajo Ayunas',
+        descripcionEstado: 'Glucosa 70–79 mg/dL en ayunas',
+      },
+      {
+        nombreEstado: 'Óptimo Ayunas',
+        descripcionEstado: 'Glucosa 80–130 mg/dL en ayunas',
       },
       {
         nombreEstado: 'Alto Ayunas',
-        descripcionEstado:
-          'Valor mayor al recomendado en ayunas; indica control insuficiente.',
+        descripcionEstado: 'Glucosa 131–180 mg/dL en ayunas',
       },
       {
         nombreEstado: 'Hiperglucemia Ayunas',
-        descripcionEstado:
-          'Nivel muy alto en ayunas; puede reflejar problemas en tratamiento o alimentación previa.',
+        descripcionEstado: 'Glucosa 181–399 mg/dL en ayunas',
       },
       {
         nombreEstado: 'Hiperglucemia Critica Ayunas',
-        descripcionEstado:
-          'Nivel extremadamente alto, requiere atención médica urgente.',
+        descripcionEstado: 'Glucosa ≥400 mg/dL en ayunas',
       },
 
       // 🔹 Preprandial
       {
-        nombreEstado: 'Óptimo Preprandial',
-        descripcionEstado:
-          'Nivel ideal antes de comer; adecuado para iniciar la ingesta.',
-      },
-      {
-        nombreEstado: 'Bajo Preprandial',
-        descripcionEstado:
-          'Nivel cercano a hipoglucemia previo a la comida; puede requerir ajuste en la ingesta.',
-      },
-      {
-        nombreEstado: 'Hipoglucemia Crítica Preprandial',
-        descripcionEstado:
-          'Nivel extremadamente bajo riesgo severo, requiere atención inmediata.',
+        nombreEstado: 'Hipoglucemia Critica Preprandial',
+        descripcionEstado: 'Glucosa <54 mg/dL antes de comida',
       },
       {
         nombreEstado: 'Hipoglucemia Preprandial',
-        descripcionEstado:
-          'Nivel bajo antes de comer; requiere acción inmediata.',
+        descripcionEstado: 'Glucosa 54–69 mg/dL antes de comida',
+      },
+      {
+        nombreEstado: 'Bajo Preprandial',
+        descripcionEstado: 'Glucosa 70–79 mg/dL antes de comida',
+      },
+      {
+        nombreEstado: 'Óptimo Preprandial',
+        descripcionEstado: 'Glucosa 80–130 mg/dL antes de comida',
       },
       {
         nombreEstado: 'Alto Preprandial',
-        descripcionEstado:
-          'Nivel elevado antes de comer; indica descontrol glucémico.',
+        descripcionEstado: 'Glucosa 131–180 mg/dL antes de comida',
       },
       {
         nombreEstado: 'Hiperglucemia Preprandial',
-        descripcionEstado:
-          'Nivel muy alto previo a comida; riesgo de complicaciones agudas.',
+        descripcionEstado: 'Glucosa 181–399 mg/dL antes de comida',
       },
       {
         nombreEstado: 'Hiperglucemia Critica Preprandial',
-        descripcionEstado:
-          'Nivel extremadamente alto, requiere atención médica urgente.',
+        descripcionEstado: 'Glucosa ≥400 mg/dL antes de comida',
       },
 
       // 🔹 Postprandial
       {
-        nombreEstado: 'Óptimo Postprandial',
-        descripcionEstado:
-          'Nivel adecuado después de comer; dentro de metas terapéuticas.',
-      },
-      {
-        nombreEstado: 'Bajo Postprandial',
-        descripcionEstado:
-          'Nivel levemente bajo tras la comida; indica posible exceso de medicación o insuficiente ingesta.',
+        nombreEstado: 'Hipoglucemia Critica Postprandial',
+        descripcionEstado: 'Glucosa <54 mg/dL después de comida',
       },
       {
         nombreEstado: 'Hipoglucemia Postprandial',
-        descripcionEstado:
-          'Descenso marcado tras la comida; requiere corrección inmediata.',
+        descripcionEstado: 'Glucosa 54–69 mg/dL después de comida',
       },
       {
-        nombreEstado: 'Hipoglucemia Crítica Postprandial',
-        descripcionEstado:
-          'Nivel extremadamente bajo riesgo severo, requiere atención inmediata.',
+        nombreEstado: 'Bajo Postprandial',
+        descripcionEstado: 'Glucosa 70–79 mg/dL después de comida',
+      },
+      {
+        nombreEstado: 'Óptimo Postprandial',
+        descripcionEstado: 'Glucosa 80–180 mg/dL después de comida',
       },
       {
         nombreEstado: 'Alto Postprandial',
-        descripcionEstado:
-          'Nivel mayor al recomendado tras comer; puede deberse a exceso de carbohidratos o poca insulina.',
+        descripcionEstado: 'Glucosa 181–250 mg/dL después de comida',
       },
       {
         nombreEstado: 'Hiperglucemia Postprandial',
-        descripcionEstado:
-          'Nivel muy alto tras la comida; situación de alto riesgo.',
+        descripcionEstado: 'Glucosa 251–399 mg/dL después de comida',
       },
       {
         nombreEstado: 'Hiperglucemia Critica Postprandial',
-        descripcionEstado:
-          'Nivel extremadamente alto, requiere atención médica urgente.',
+        descripcionEstado: 'Glucosa ≥400 mg/dL después de comida',
       },
 
-      // 🔹 Otros momentos (antes de dormir, madrugada, etc.)
+      // 🔹 Otros momentos
       {
-        nombreEstado: 'Óptimo',
-        descripcionEstado:
-          'Valor dentro del rango recomendado en controles nocturnos o intermedios.',
-      },
-      {
-        nombreEstado: 'Bajo',
-        descripcionEstado:
-          'Nivel cercano a hipoglucemia fuera de comidas; requiere vigilancia.',
+        nombreEstado: 'Hipoglucemia Critica',
+        descripcionEstado: 'Glucosa <54 mg/dL en otro momento',
       },
       {
         nombreEstado: 'Hipoglucemia',
-        descripcionEstado:
-          'Nivel bajo fuera de las comidas; puede ser peligroso durante la noche.',
+        descripcionEstado: 'Glucosa 54–69 mg/dL en otro momento',
       },
       {
-        nombreEstado: 'Hipoglucemia Crítica',
-        descripcionEstado:
-          'Nivel extremadamente bajo riesgo severo, requiere atención inmediata.',
+        nombreEstado: 'Bajo',
+        descripcionEstado: 'Glucosa 70–79 mg/dL en otro momento',
+      },
+      {
+        nombreEstado: 'Óptimo',
+        descripcionEstado: 'Glucosa 80–130 mg/dL en otro momento',
       },
       {
         nombreEstado: 'Alto',
-        descripcionEstado:
-          'Nivel por encima del ideal en horarios distintos a comidas o ayunas.',
+        descripcionEstado: 'Glucosa 131–180 mg/dL en otro momento',
       },
       {
         nombreEstado: 'Hiperglucemia',
-        descripcionEstado:
-          'Nivel muy alto fuera de comidas; requiere atención médica si persiste.',
+        descripcionEstado: 'Glucosa 181–399 mg/dL en otro momento',
       },
       {
         nombreEstado: 'Hiperglucemia Critica',
-        descripcionEstado:
-          'Nivel extremadamente alto, requiere atención médica urgente.',
+        descripcionEstado: 'Glucosa ≥400 mg/dL en otro momento',
       },
     ];
 
     for (const estado of estados) {
-      const exists = await this.estadoRepo.findOne({
+      const existe = await this.estadoRepo.findOne({
         where: { nombreEstado: estado.nombreEstado },
       });
-      if (!exists) await this.estadoRepo.save(this.estadoRepo.create(estado));
+
+      if (!existe) {
+        await this.estadoRepo.save(this.estadoRepo.create(estado));
+      }
     }
 
-    console.log('✅ Estados insertados');
+    console.log('✅ Estados insertados correctamente');
   }
 }

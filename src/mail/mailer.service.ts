@@ -1,15 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
-import mailerConfig from './mailer.config';
+import { Inject, Injectable } from '@nestjs/common';
+import { Transporter } from 'nodemailer';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class MailerService {
-  private transporter: nodemailer.Transporter;
-
-  constructor(private readonly jwtService: JwtService) {
-    this.transporter = nodemailer.createTransport(mailerConfig);
-    console.log('📦 Transporter creado con configuración:', mailerConfig);
+  constructor(
+    private readonly jwtService: JwtService,
+    @Inject('MAILER_TRANSPORTER') private readonly transporter: Transporter
+  ) {
+    console.log('📦 Transporter inyectado y listo');
   }
 
   generateVerificationToken(userId: number): string {
@@ -22,7 +21,7 @@ export class MailerService {
   }
 
   async sendVerificationEmail(to: string, token: string) {
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const frontendUrl = process.env.FRONTEND_URL;
     const verificationUrl = `${frontendUrl}/verify?token=${token}`;
 
     const html = `
@@ -46,7 +45,7 @@ export class MailerService {
 
     try {
       const info = await this.transporter.sendMail({
-        from: `"GlycoPulse" <${mailerConfig.auth.user}>`,
+        from: `"GlycoPulse" <${process.env.EMAIL_USER}>`,
         to,
         subject: 'Verificación de cuenta - GlycoPulse',
         html,
@@ -58,7 +57,7 @@ export class MailerService {
   }
 
   async sendRecoveryEmail(to: string, token: string) {
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const frontendUrl = process.env.FRONTEND_URL;
     const recoveryUrl = `${frontendUrl}/reset-password?token=${token}`;
 
     const html = `
@@ -82,7 +81,7 @@ export class MailerService {
 
     try {
       const info = await this.transporter.sendMail({
-        from: `"GlycoPulse" <${mailerConfig.auth.user}>`,
+        from: `"GlycoPulse" <${process.env.EMAIL_USER}>`,
         to,
         subject: 'Recuperación de contraseña - GlycoPulse',
         html,
