@@ -9,11 +9,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Usuario } from 'src/usuarios/entities/usuario.entity';
 import { Glucometria } from './entities/glucometria.entity';
 import { UpdateGlucometriaDto } from './dto/update-glucometria.dto';
-/**import { es } from 'date-fns/locale';
-import { format, parseISO } from 'date-fns';**/
+import { es } from 'date-fns/locale';
+import { format } from 'date-fns';
 import { RangoGlucometria } from 'src/rango-glucometrias/entities/rango-glucometria.entity';
 import { MomentoGlucometria } from './enums/momento-glucometria.enum';
 import { ResponseGlucometriaDto } from './dto/response-glucometria.dto';
+import { RecomendacionesGlucometria } from 'src/recomendaciones-glucometria/entities/recomendaciones-glucometria.entity';
+import { EstadoGlucometria } from 'src/estado-glucometria/entities/estado-glucometria.entity';
 
 @Injectable()
 export class GlucometriasService {
@@ -61,13 +63,25 @@ export class GlucometriasService {
   private toResponseDto(
     glucometria: Glucometria,
     rango: RangoGlucometria,
-    estado,
-    recomendaciones
+    estado: EstadoGlucometria,
+    recomendaciones: RecomendacionesGlucometria[]
   ): ResponseGlucometriaDto {
+    const fechaFormateada = format(
+      new Date(glucometria.fechaGlucometria),
+      'EEE dd MMM yyyy',
+      { locale: es }
+    );
+
+    const horaFormateada = format(
+      new Date(`1970-01-01T${glucometria.horaGlucometria}`),
+      'hh:mm a',
+      { locale: es }
+    );
+
     return {
       idGlucometria: glucometria.idGlucometria,
-      fechaGlucometria: glucometria.fechaGlucometria,
-      horaGlucometria: glucometria.horaGlucometria,
+      fechaGlucometria: fechaFormateada,
+      horaGlucometria: horaFormateada,
       nivelGlucometria: glucometria.nivelGlucometria,
       momento: glucometria.momento,
       usuario: {
@@ -147,7 +161,7 @@ export class GlucometriasService {
     idGlucometria: number,
     updateGlucometriaDto: UpdateGlucometriaDto,
     userId: string
-  ): Promise<Glucometria> {
+  ): Promise<ResponseGlucometriaDto> {
     const userIdNumber = Number(userId);
 
     if (isNaN(userIdNumber)) {
@@ -156,34 +170,53 @@ export class GlucometriasService {
 
     const usuario = await this.usuario.findOne({
       where: { idUsuario: userIdNumber },
+      relations: ['rol'],
     });
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    const glucometriaBus = await this.glucometria.findOneBy({ idGlucometria });
-    if (!glucometriaBus) {
-      throw new NotFoundException('Glucometría no encontrada');
-    }
+    const glucometria = await this.glucometria.findOne({
+      where: { idGlucometria: idGlucometria },
+      relations: ['usuario'],
+    });
+    if (!glucometria) throw new NotFoundException('Glucometría no encontrada');
 
-    // Asignar los nuevos valores al objeto glucometriaBus
-    Object.assign(glucometriaBus, {
-      fechaGlucometria: updateGlucometriaDto.fechaGlucometria,
-      horaGlucometria: updateGlucometriaDto.horaGlucometria,
-      nivelGlucometria: updateGlucometriaDto.nivelGlucometria,
+    const { rango, estado, recomendaciones } = await this.analizarGlucometria(
+      updateGlucometriaDto.nivelGlucometria ?? glucometria.nivelGlucometria,
+      updateGlucometriaDto.momento ?? glucometria.momento
+    );
+
+    // Asignar los nuevos valores al objeto glucometria
+    Object.assign(glucometria, {
+      fechaGlucometria:
+        updateGlucometriaDto.fechaGlucometria ?? glucometria.fechaGlucometria,
+      horaGlucometria:
+        updateGlucometriaDto.horaGlucometria ?? glucometria.horaGlucometria,
+      nivelGlucometria:
+        updateGlucometriaDto.nivelGlucometria ?? glucometria.nivelGlucometria,
+      momento: updateGlucometriaDto.momento ?? glucometria.momento,
       usuario,
+      rango,
     });
 
-    return await this.glucometria.save(glucometriaBus);
+    const glucometriaActualizada = await this.glucometria.save(glucometria);
+
+    return this.toResponseDto(
+      glucometriaActualizada,
+      rango,
+      estado,
+      recomendaciones
+    );
   }
 
   async remove(idGlucometria: number) {
     const glucometriaBus = await this.glucometria.findOneBy({ idGlucometria });
 
     if (!glucometriaBus) {
-      throw new NotFoundException('Esta Glucometria existe');
+      throw new NotFoundException('Esta no Glucometria existe');
     }
-    await this.glucometria.delete(idGlucometria);
+    await this.glucometria.remove(glucometriaBus);
     return { message: 'Glucometria eliminada correctamente' };
   }
 
@@ -194,5 +227,96 @@ export class GlucometriasService {
       month: 'long',
       year: 'numeric',
     }).format(fecha);
+  }
+
+  // Buscar todas las glucometrías de un usuario (con filtros opcionales)
+  async findAllByUser(
+    userId: string,
+    filters?: {
+      fechaGlucometria?: string;
+      horaGlucometria?: string;
+      rangoGlucometria?: string;
+      orderBy?: 'fecha' | 'hora' | 'nivel';
+      order?: 'ASC' | 'DESC';
+    }
+  ): Promise<ResponseGlucometriaDto[]> {
+    const userIdNumber = Number(userId);
+    if (isNaN(userIdNumber)) {
+      throw new BadRequestException('El ID de usuario no es válido');
+    }
+
+    let query = this.glucometria
+      .createQueryBuilder('gluco')
+      .leftJoinAndSelect('gluco.usuario', 'usuario')
+      .leftJoinAndSelect('usuario.rol', 'rol')
+      .leftJoinAndSelect('gluco.rango', 'rango')
+      .leftJoinAndSelect('rango.estado', 'estado')
+      .leftJoinAndSelect('estado.recomendaciones', 'recomendacionesEstado')
+      .leftJoinAndSelect('recomendacionesEstado.recomendacion', 'recomendacion')
+      .where('usuario.idUsuario = :userId', { userId: userIdNumber });
+
+    if (filters?.fechaGlucometria) {
+      query = query.andWhere('gluco.fechaGlucometria = :fecha', {
+        fecha: filters.fechaGlucometria,
+      });
+    }
+
+    if (filters?.horaGlucometria) {
+      query = query.andWhere('gluco.horaGlucometria = :hora', {
+        hora: filters.horaGlucometria,
+      });
+    }
+
+    if (filters?.rangoGlucometria) {
+      query = query.andWhere('rango.nombreRango = :rango', {
+        rango: filters.rangoGlucometria,
+      });
+    }
+
+    if (filters?.orderBy) {
+      query = query.orderBy(
+        `gluco.${filters.orderBy}Glucometria`,
+        filters.order ?? 'DESC'
+      );
+    } else {
+      query = query
+        .orderBy('gluco.fechaGlucometria', 'DESC')
+        .addOrderBy('gluco.horaGlucometria', 'DESC');
+    }
+
+    const glucometrias = await query.getMany();
+
+    return glucometrias.map((g) =>
+      this.toResponseDto(
+        g,
+        g.rango,
+        g.rango.estado,
+        g.rango.estado.recomendaciones.map((re) => re.recomendacion)
+      )
+    );
+  }
+
+  async findOneById(id: number): Promise<ResponseGlucometriaDto> {
+    const glucometria = await this.glucometria
+      .createQueryBuilder('gluco')
+      .leftJoinAndSelect('gluco.usuario', 'usuario')
+      .leftJoinAndSelect('usuario.rol', 'rol')
+      .leftJoinAndSelect('gluco.rango', 'rango')
+      .leftJoinAndSelect('rango.estado', 'estado')
+      .leftJoinAndSelect('estado.recomendaciones', 'recomendacionesEstado')
+      .leftJoinAndSelect('recomendacionesEstado.recomendacion', 'recomendacion')
+      .where('gluco.idGlucometria = :id', { id })
+      .getOne();
+
+    if (!glucometria) {
+      throw new NotFoundException('Glucometría no encontrada');
+    }
+
+    return this.toResponseDto(
+      glucometria,
+      glucometria.rango,
+      glucometria.rango.estado,
+      glucometria.rango.estado.recomendaciones.map((re) => re.recomendacion)
+    );
   }
 }
