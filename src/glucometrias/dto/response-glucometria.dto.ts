@@ -24,6 +24,7 @@ export class ResponseGlucometriaDto {
     valorMinRango: number;
     valorMaxRango: number;
     momento: MomentoGlucometria;
+    color?: string;
   };
 
   estado: {

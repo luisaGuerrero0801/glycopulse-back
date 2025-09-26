@@ -30,6 +30,9 @@ export class RangoGlucometria {
   })
   momento: MomentoGlucometria;
 
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  color: string;
+
   @ManyToOne(() => EstadoGlucometria, (estado) => estado.rangos, {
     eager: true,
   })

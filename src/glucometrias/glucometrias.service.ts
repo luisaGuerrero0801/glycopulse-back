@@ -100,6 +100,7 @@ export class GlucometriasService {
         valorMinRango: rango.valorMinRango,
         valorMaxRango: rango.valorMaxRango,
         momento: rango.momento,
+        color: rango.color,
       },
       estado: {
         idEstado: estado.idEstado,
@@ -220,15 +221,6 @@ export class GlucometriasService {
     return { message: 'Glucometria eliminada correctamente' };
   }
 
-  private formatFecha(fechaStr: string): string {
-    const fecha = new Date(fechaStr);
-    return new Intl.DateTimeFormat('es-CO', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-    }).format(fecha);
-  }
-
   // Buscar todas las glucometrías de un usuario (con filtros opcionales)
   async findAllByUser(
     userId: string,
@@ -236,8 +228,9 @@ export class GlucometriasService {
       fechaGlucometria?: string;
       horaGlucometria?: string;
       rangoGlucometria?: string;
-      orderBy?: 'fecha' | 'hora' | 'nivel';
-      order?: 'ASC' | 'DESC';
+      orderFecha?: 'ASC' | 'DESC';
+      orderFechaHora?: 'ASC' | 'DESC';
+      orderNivel?: 'ASC' | 'DESC';
     }
   ): Promise<ResponseGlucometriaDto[]> {
     const userIdNumber = Number(userId);
@@ -273,13 +266,16 @@ export class GlucometriasService {
       });
     }
 
-    if (filters?.orderBy) {
-      query = query.orderBy(
-        `gluco.${filters.orderBy}Glucometria`,
-        filters.order ?? 'DESC'
-      );
+    if (filters?.orderFecha) {
+      query.orderBy('gluco.fechaGlucometria', filters.orderFecha);
+    } else if (filters?.orderFechaHora) {
+      query
+        .orderBy('gluco.fechaGlucometria', filters.orderFechaHora)
+        .addOrderBy('gluco.horaGlucometria', filters.orderFechaHora);
+    } else if (filters?.orderNivel) {
+      query.orderBy('gluco.nivelGlucometria', filters.orderNivel);
     } else {
-      query = query
+      query
         .orderBy('gluco.fechaGlucometria', 'DESC')
         .addOrderBy('gluco.horaGlucometria', 'DESC');
     }
@@ -318,5 +314,54 @@ export class GlucometriasService {
       glucometria.rango.estado,
       glucometria.rango.estado.recomendaciones.map((re) => re.recomendacion)
     );
+  }
+
+  async findLastByUser(
+    userId: string
+  ): Promise<{ fecha: string; hora: string }> {
+    const userIdNumber = Number(userId);
+
+    if (isNaN(userIdNumber)) {
+      throw new BadRequestException('El ID de usuario no es válido');
+    }
+
+    const ultimaGlucometria = await this.glucometria
+      .createQueryBuilder('gluco')
+      .where('gluco.usuario = :userId', { userId: userIdNumber })
+      .orderBy('gluco.fechaGlucometria', 'DESC')
+      .addOrderBy('gluco.horaGlucometria', 'DESC')
+      .getOne();
+
+    if (!ultimaGlucometria) {
+      throw new NotFoundException(
+        'No se encontró ninguna glucometría para este usuario'
+      );
+    }
+
+    const fechaFormateada = format(
+      ultimaGlucometria.fechaGlucometria,
+      'EEE dd MMM yyyy',
+      { locale: es }
+    );
+    const horaFormateada = format(
+      new Date(`1970-01-01T${ultimaGlucometria.horaGlucometria}`),
+      'hh:mm aaaa',
+      { locale: es }
+    );
+
+    return {
+      fecha: fechaFormateada,
+      hora: horaFormateada,
+    };
+  }
+
+  async getNombresRangosUnicos(): Promise<string[]> {
+    const rangos = await this.rango
+      .createQueryBuilder('rango')
+      .select('DISTINCT rango.nombreRango', 'nombreRango')
+      .orderBy('rango.nombreRango', 'ASC')
+      .getRawMany();
+
+    return rangos.map((r) => r.nombreRango);
   }
 }

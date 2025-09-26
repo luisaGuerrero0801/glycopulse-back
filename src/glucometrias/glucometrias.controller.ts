@@ -39,24 +39,32 @@ export class GlucometriasController {
     return this.glucometrias.findOneById(Number(id));
   }
 
+  @Get('rangos/nombres')
+  async getNombresRangos() {
+    return this.glucometrias.getNombresRangosUnicos();
+  }
+
+  @Get('last/:userId')
+  findLastByUser(@Param('userId') userId: string) {
+    return this.glucometrias.findLastByUser(userId);
+  }
+
   @Get('user/:userId')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('Paciente', 'Doctor')
   async findAllByUser(
     @Param('userId') userId: string,
-    @Query('fechaGlucometria') fecha?: string,
-    @Query('horaGlucometria') hora?: string,
-    @Query('rangoGlucometria') rango?: string,
-    @Query('orderBy') orderBy?: 'fecha' | 'hora' | 'nivel',
-    @Query('order') order?: 'ASC' | 'DESC'
+    @Query()
+    filters?: {
+      fechaGlucometria?: string;
+      horaGlucometria?: string;
+      rangoGlucometria?: string;
+      orderFecha?: 'ASC' | 'DESC';
+      orderFechaHora?: 'ASC' | 'DESC';
+      orderNivel?: 'ASC' | 'DESC';
+    }
   ) {
-    return this.glucometrias.findAllByUser(userId, {
-      fechaGlucometria: fecha,
-      horaGlucometria: hora,
-      rangoGlucometria: rango,
-      orderBy,
-      order,
-    });
+    return this.glucometrias.findAllByUser(userId, filters);
   }
 
   @Patch(':idGlucometria')
