@@ -2,7 +2,7 @@ import { MomentoGlucometria } from '../enums/momento-glucometria.enum';
 
 export class ResponseGlucometriaDto {
   idGlucometria: number;
-  fechaGlucometria: Date;
+  fechaGlucometria: string;
   horaGlucometria: string;
   nivelGlucometria: number;
   momento: MomentoGlucometria;
@@ -24,6 +24,7 @@ export class ResponseGlucometriaDto {
     valorMinRango: number;
     valorMaxRango: number;
     momento: MomentoGlucometria;
+    color?: string;
   };
 
   estado: {

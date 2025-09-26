@@ -1,6 +1,6 @@
 import {
   Controller,
-  /*Get,*/
+  Get,
   Post,
   Body,
   Patch,
@@ -9,6 +9,7 @@ import {
   UseGuards,
   Req,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { GlucometriasService } from './glucometrias.service';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
@@ -31,6 +32,39 @@ export class GlucometriasController {
   ) {
     const userId = req.user?.sub;
     return this.glucometrias.create(createGlucometriaDto, userId);
+  }
+
+  @Get(':id')
+  async findOneById(@Param('id') id: string) {
+    return this.glucometrias.findOneById(Number(id));
+  }
+
+  @Get('rangos/nombres')
+  async getNombresRangos() {
+    return this.glucometrias.getNombresRangosUnicos();
+  }
+
+  @Get('last/:userId')
+  findLastByUser(@Param('userId') userId: string) {
+    return this.glucometrias.findLastByUser(userId);
+  }
+
+  @Get('user/:userId')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('Paciente', 'Doctor')
+  async findAllByUser(
+    @Param('userId') userId: string,
+    @Query()
+    filters?: {
+      fechaGlucometria?: string;
+      horaGlucometria?: string;
+      rangoGlucometria?: string;
+      orderFecha?: 'ASC' | 'DESC';
+      orderFechaHora?: 'ASC' | 'DESC';
+      orderNivel?: 'ASC' | 'DESC';
+    }
+  ) {
+    return this.glucometrias.findAllByUser(userId, filters);
   }
 
   @Patch(':idGlucometria')

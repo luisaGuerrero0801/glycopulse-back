@@ -243,7 +243,7 @@ export class RecetasService {
     if (!receta) {
       throw new NotFoundException('Esta receta no existe');
     }
-    await this.recetas.delete(idReceta);
+    await this.recetas.remove(receta);
     return { message: 'Receta eliminada correctamente' };
   }
 }
