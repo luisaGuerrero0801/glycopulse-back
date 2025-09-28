@@ -117,6 +117,7 @@ export class UsuariosService {
         rol: { nombreRol: 'Doctor' },
         estado: 'Activo',
       },
+      select: ['idUsuario', 'nombresUsuario', 'apellidosUsuario', 'estado'],
     });
   }
 
