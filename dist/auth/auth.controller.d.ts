@@ -2,6 +2,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RecoverAccountDto } from './dto/recover-account.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { Response } from 'express';
 export declare class AuthController {
     private readonly authService;
     constructor(authService: AuthService);
@@ -10,9 +11,11 @@ export declare class AuthController {
         correoUsuario: string;
         rol: string;
     }>;
-    verificarCuenta(token: string): Promise<{
-        message: any;
+    verificarCuenta(token: string, res: Response): Promise<Response<any, Record<string, any>>>;
+    verificarCuentaAPI(token: string): Promise<{
+        message: string;
     }>;
+    private enviarRespuestaHTML;
     recuperarCuenta(dto: RecoverAccountDto): Promise<{
         message: string;
     }>;
