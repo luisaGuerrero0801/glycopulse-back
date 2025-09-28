@@ -54,7 +54,9 @@ export class MailerService {
   }
 
   async sendVerificationEmail(to: string, token: string) {
-    const backendUrl = this.configService.get<string>('BACKEND_URL');
+    const backendUrl = this.configService
+      .get<string>('BACKEND_URL')
+      .replace(/\/+$/, '');
     if (!backendUrl) {
       throw new Error(
         'BACKEND_URL no está definido en las variables de entorno'
