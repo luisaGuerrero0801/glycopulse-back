@@ -66,12 +66,7 @@ export class GlucometriasService {
     estado: EstadoGlucometria,
     recomendaciones: RecomendacionesGlucometria[]
   ): ResponseGlucometriaDto {
-    const fechaFormateada = format(
-      new Date(glucometria.fechaGlucometria),
-      'EEE dd MMM yyyy',
-      { locale: es }
-    );
-
+    const { fecha } = this.formatGlucometriaDateTime(glucometria);
     const horaFormateada = format(
       new Date(`1970-01-01T${glucometria.horaGlucometria}`),
       'hh:mm a',
@@ -80,7 +75,7 @@ export class GlucometriasService {
 
     return {
       idGlucometria: glucometria.idGlucometria,
-      fechaGlucometria: fechaFormateada,
+      fechaGlucometria: fecha,
       horaGlucometria: horaFormateada,
       nivelGlucometria: glucometria.nivelGlucometria,
       momento: glucometria.momento,
@@ -226,10 +221,8 @@ export class GlucometriasService {
     userId: string,
     filters?: {
       fechaGlucometria?: string;
-      horaGlucometria?: string;
       rangoGlucometria?: string;
       orderFecha?: 'ASC' | 'DESC';
-      orderFechaHora?: 'ASC' | 'DESC';
       orderNivel?: 'ASC' | 'DESC';
     }
   ): Promise<ResponseGlucometriaDto[]> {
@@ -254,30 +247,20 @@ export class GlucometriasService {
       });
     }
 
-    if (filters?.horaGlucometria) {
-      query = query.andWhere('gluco.horaGlucometria = :hora', {
-        hora: filters.horaGlucometria,
-      });
-    }
-
     if (filters?.rangoGlucometria) {
       query = query.andWhere('rango.nombreRango = :rango', {
         rango: filters.rangoGlucometria,
       });
     }
 
+    // Ordenamiento
     if (filters?.orderFecha) {
       query.orderBy('gluco.fechaGlucometria', filters.orderFecha);
-    } else if (filters?.orderFechaHora) {
-      query
-        .orderBy('gluco.fechaGlucometria', filters.orderFechaHora)
-        .addOrderBy('gluco.horaGlucometria', filters.orderFechaHora);
     } else if (filters?.orderNivel) {
       query.orderBy('gluco.nivelGlucometria', filters.orderNivel);
     } else {
-      query
-        .orderBy('gluco.fechaGlucometria', 'DESC')
-        .addOrderBy('gluco.horaGlucometria', 'DESC');
+      // Orden por defecto: fecha descendente
+      query.orderBy('gluco.fechaGlucometria', 'DESC');
     }
 
     const glucometrias = await query.getMany();
@@ -338,11 +321,8 @@ export class GlucometriasService {
       );
     }
 
-    const fechaFormateada = format(
-      ultimaGlucometria.fechaGlucometria,
-      'EEE dd MMM yyyy',
-      { locale: es }
-    );
+    const { fecha } = this.formatGlucometriaDateTime(ultimaGlucometria);
+
     const horaFormateada = format(
       new Date(`1970-01-01T${ultimaGlucometria.horaGlucometria}`),
       'hh:mm aaaa',
@@ -350,7 +330,7 @@ export class GlucometriasService {
     );
 
     return {
-      fecha: fechaFormateada,
+      fecha: fecha,
       hora: horaFormateada,
     };
   }
@@ -363,5 +343,52 @@ export class GlucometriasService {
       .getRawMany();
 
     return rangos.map((r) => r.nombreRango);
+  }
+
+  private formatearFecha(
+    fecha: Date | string,
+    formato: 'completo' | 'corto' | 'input' | 'personalizado' = 'completo',
+    formatoPersonalizado?: string
+  ): string {
+    let fechaLocal: Date;
+
+    if (typeof fecha === 'string') {
+      const [year, month, day] = fecha.split('-').map(Number);
+      fechaLocal = new Date(year, month - 1, day);
+    } else {
+      const year = fecha.getFullYear();
+      const month = fecha.getMonth();
+      const day = fecha.getDate();
+      fechaLocal = new Date(year, month, day);
+    }
+
+    switch (formato) {
+      case 'completo':
+        return format(fechaLocal, 'EEEE dd MMMM yyyy', { locale: es });
+      case 'corto':
+        return format(fechaLocal, 'dd MMM yyyy', { locale: es });
+      case 'input':
+        const year = fechaLocal.getFullYear();
+        const month = String(fechaLocal.getMonth() + 1).padStart(2, '0');
+        const day = String(fechaLocal.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      case 'personalizado':
+        if (!formatoPersonalizado)
+          throw new Error('Debe proporcionar un formato personalizado');
+        return format(fechaLocal, formatoPersonalizado, { locale: es });
+      default:
+        return format(fechaLocal, 'EEEE dd MMMM yyyy', { locale: es });
+    }
+  }
+
+  private formatGlucometriaDateTime(glucometria: Glucometria): {
+    fecha: string;
+  } {
+    const fechaFormateada = this.formatearFecha(
+      glucometria.fechaGlucometria,
+      'personalizado',
+      'eee dd MMM yyyy'
+    );
+    return { fecha: fechaFormateada };
   }
 }
