@@ -66,7 +66,7 @@ let MailerService = class MailerService {
         if (!backendUrl) {
             throw new Error('BACKEND_URL no está definido en las variables de entorno');
         }
-        const verificationUrl = `${backendUrl}api/v1/auth/verify?token=${token}`;
+        const verificationUrl = `${backendUrl}/api/v1/auth/verify?token=${token}`;
         const html = `
       <div style="font-family: Arial, sans-serif;">
         <h2>Bienvenido a <span style="color: #2563eb;">GlycoPulse</span></h2>
