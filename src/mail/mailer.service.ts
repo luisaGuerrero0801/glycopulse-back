@@ -63,7 +63,7 @@ export class MailerService {
       );
     }
 
-    const verificationUrl = `${backendUrl}/auth/verify?token=${token}`;
+    const verificationUrl = `${backendUrl}api/v1/auth/verify?token=${token}`;
 
     const html = `
       <div style="font-family: Arial, sans-serif;">

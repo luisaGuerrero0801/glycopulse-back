@@ -60,11 +60,13 @@ let MailerService = class MailerService {
         }
     }
     async sendVerificationEmail(to, token) {
-        const backendUrl = this.configService.get('BACKEND_URL');
+        const backendUrl = this.configService
+            .get('BACKEND_URL')
+            .replace(/\/+$/, '');
         if (!backendUrl) {
             throw new Error('BACKEND_URL no está definido en las variables de entorno');
         }
-        const verificationUrl = `${backendUrl}/auth/verify?token=${token}`;
+        const verificationUrl = `${backendUrl}api/v1/auth/verify?token=${token}`;
         const html = `
       <div style="font-family: Arial, sans-serif;">
         <h2>Bienvenido a <span style="color: #2563eb;">GlycoPulse</span></h2>
