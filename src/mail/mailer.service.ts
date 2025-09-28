@@ -8,16 +8,11 @@ export class MailerService {
     private readonly jwtService: JwtService,
     @Inject('MAILER_TRANSPORTER') private readonly transporter: Transporter
   ) {
-    console.log('📦 Transporter inyectado y listo');
+    console.log('📦 Gmail Transporter cargado con OAuth2');
   }
 
   generateVerificationToken(userId: number): string {
-    return this.jwtService.sign(
-      { sub: userId },
-      {
-        expiresIn: '1d',
-      }
-    );
+    return this.jwtService.sign({ sub: userId }, { expiresIn: '1d' });
   }
 
   async sendVerificationEmail(to: string, token: string) {
@@ -45,7 +40,7 @@ export class MailerService {
 
     try {
       const info = await this.transporter.sendMail({
-        from: `"GlycoPulse" <${process.env.EMAIL_USER}>`,
+        from: `"GlycoPulse" <${process.env.GMAIL_USER}>`,
         to,
         subject: 'Verificación de cuenta - GlycoPulse',
         html,
@@ -64,7 +59,6 @@ export class MailerService {
       <div style="font-family: Arial, sans-serif;">
         <h2>Recuperación de contraseña - GlycoPulse</h2>
         <p>Hemos recibido una solicitud para restablecer tu contraseña.</p>
-        <p>Haz clic en el siguiente botón para continuar:</p>
         <a href="${recoveryUrl}" style="
           display: inline-block;
           padding: 12px 24px;
@@ -81,7 +75,7 @@ export class MailerService {
 
     try {
       const info = await this.transporter.sendMail({
-        from: `"GlycoPulse" <${process.env.EMAIL_USER}>`,
+        from: `"GlycoPulse" <${process.env.GMAIL_USER}>`,
         to,
         subject: 'Recuperación de contraseña - GlycoPulse',
         html,

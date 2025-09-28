@@ -5,20 +5,15 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-// Variables de entorno ya cargadas por NestJS ConfigModule
-const EMAIL_HOST = process.env.EMAIL_HOST || 'smtp.gmail.com';
-const EMAIL_PORT = Number(process.env.EMAIL_PORT) || 587;
-const EMAIL_USER = process.env.EMAIL_USER;
-const EMAIL_PASS = process.env.EMAIL_PASS;
-
 const transporter = nodemailer.createTransport({
-  host: EMAIL_HOST,
-  port: EMAIL_PORT,
-  secure: false,
-  requireTLS: true,
+  service: 'gmail',
   auth: {
-    user: EMAIL_USER,
-    pass: EMAIL_PASS, // App Password si Gmail tiene 2FA
+    type: 'OAuth2',
+    user: process.env.GMAIL_USER,
+    clientId: process.env.GMAIL_CLIENT_ID, // client_id generado
+    clientSecret: process.env.GMAIL_CLIENT_SECRET, // client_secret generado
+    refreshToken: process.env.GMAIL_REFRESH_TOKEN, // refresh token obtenido en Playground
+    accessToken: process.env.GMAIL_ACCESS_TOKEN, // opcional, se puede generar en runtime
   },
   tls: { rejectUnauthorized: false },
   logger: true,
@@ -27,13 +22,13 @@ const transporter = nodemailer.createTransport({
 (async () => {
   try {
     const info = await transporter.sendMail({
-      from: `"GlycoPulse" <${EMAIL_USER}>`,
+      from: `"GlycoPulse" <${process.env.GMAIL_USER}>`,
       to: 'glycopulse@gmail.com',
-      subject: '🚀 Prueba de correo desde GlycoPulse',
+      subject: '🚀 Prueba de correo desde GlycoPulse con Gmail API',
       html: `
         <h2>¡Hola!</h2>
-        <p>Correo de prueba enviado desde tu backend con Nodemailer + Gmail.</p>
-        <p><strong>Todo funciona correctamente ✅</strong></p>
+        <p>Este es un correo de prueba enviado utilizando Nodemailer + Gmail OAuth2.</p>
+        <p><strong>Integración con API funcionando correctamente ✅</strong></p>
       `,
     });
     console.log('✅ Correo enviado:', info.messageId);

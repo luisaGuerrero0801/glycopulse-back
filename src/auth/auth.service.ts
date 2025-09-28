@@ -10,7 +10,7 @@ export class AuthService {
   constructor(
     private readonly usuariosService: UsuariosService,
     private readonly jwtService: JwtService,
-    private readonly mailerService: MailerService // se necesita para enviar el correo
+    private readonly mailerService: MailerService
   ) {}
 
   async login({ correoUsuario, contrasenaUsuario }: LoginDto) {
