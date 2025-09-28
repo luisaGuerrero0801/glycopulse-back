@@ -25,15 +25,13 @@ let AuthController = class AuthController {
     login(loginDto) {
         return this.authService.login(loginDto);
     }
-    async verificarCuenta(token, res) {
+    async verificarCuenta(token) {
         try {
             const result = await this.authService.verificarCuenta(token);
-            const frontendUrl = process.env.FRONTEND_URL;
-            return res.redirect(`${frontendUrl}/verification-success?message=${encodeURIComponent(result.message)}`);
+            return { message: result.message };
         }
         catch (error) {
-            const frontendUrl = process.env.FRONTEND_URL;
-            return res.redirect(`${frontendUrl}/verification-failed?message=${encodeURIComponent(error.message)}`);
+            return { message: error.message || 'Token inválido o expirado' };
         }
     }
     recuperarCuenta(dto) {
@@ -54,9 +52,8 @@ __decorate([
 __decorate([
     (0, common_1.Get)('verify'),
     __param(0, (0, common_1.Query)('token')),
-    __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "verificarCuenta", null);
 __decorate([

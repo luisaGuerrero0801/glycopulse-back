@@ -1,5 +1,4 @@
 import { Body, Controller, Post, Get, Query, Res } from '@nestjs/common';
-import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RecoverAccountDto } from './dto/recover-account.dto';
@@ -17,21 +16,12 @@ export class AuthController {
 
   // ✅ Endpoint para activar/verificar la cuenta desde el correo
   @Get('verify')
-  async verificarCuenta(@Query('token') token: string, @Res() res: Response) {
+  async verificarCuenta(@Query('token') token: string) {
     try {
       const result = await this.authService.verificarCuenta(token);
-
-      // Redirige al frontend con mensaje de éxito
-      const frontendUrl = process.env.FRONTEND_URL;
-      return res.redirect(
-        `${frontendUrl}/verification-success?message=${encodeURIComponent(result.message)}`
-      );
+      return { message: result.message }; // Devuelve JSON
     } catch (error) {
-      // Redirige al frontend con mensaje de error
-      const frontendUrl = process.env.FRONTEND_URL;
-      return res.redirect(
-        `${frontendUrl}/verification-failed?message=${encodeURIComponent(error.message)}`
-      );
+      return { message: error.message || 'Token inválido o expirado' }; // JSON también
     }
   }
 
