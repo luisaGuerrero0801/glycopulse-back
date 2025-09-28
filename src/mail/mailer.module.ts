@@ -1,8 +1,8 @@
+import { createGmailClient } from './gmail.client';
 import { Global, Module } from '@nestjs/common';
 import { MailerService } from './mailer.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { createGmailTransporter } from './gmail.transporter';
 
 @Global()
 @Module({
@@ -19,10 +19,10 @@ import { createGmailTransporter } from './gmail.transporter';
   ],
   providers: [
     {
-      provide: 'MAILER_TRANSPORTER',
+      provide: 'GMAIL_CLIENT',
       inject: [ConfigService],
       useFactory: async (config: ConfigService) =>
-        await createGmailTransporter(config),
+        await createGmailClient(config),
     },
     MailerService,
   ],

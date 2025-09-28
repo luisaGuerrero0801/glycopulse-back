@@ -1,35 +1,40 @@
-const nodemailer = require('nodemailer');
-const dotenv = require('dotenv');
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const googleapis_1 = require("googleapis");
+const dotenv = require("dotenv");
 dotenv.config();
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        type: 'OAuth2',
-        user: process.env.GMAIL_USER,
-        clientId: process.env.GMAIL_CLIENT_ID,
-        clientSecret: process.env.GMAIL_CLIENT_SECRET,
-        refreshToken: process.env.GMAIL_REFRESH_TOKEN,
-        accessToken: process.env.GMAIL_ACCESS_TOKEN,
-    },
-    tls: { rejectUnauthorized: false },
-    logger: true,
-});
-(async () => {
+async function testGmailApi() {
     try {
-        const info = await transporter.sendMail({
-            from: `"GlycoPulse" <${process.env.GMAIL_USER}>`,
-            to: 'glycopulse@gmail.com',
-            subject: '🚀 Prueba de correo desde GlycoPulse con Gmail API',
-            html: `
-        <h2>¡Hola!</h2>
-        <p>Este es un correo de prueba enviado utilizando Nodemailer + Gmail OAuth2.</p>
-        <p><strong>Integración con API funcionando correctamente ✅</strong></p>
-      `,
+        const oAuth2Client = new googleapis_1.google.auth.OAuth2(process.env.GMAIL_CLIENT_ID, process.env.GMAIL_CLIENT_SECRET, process.env.GMAIL_REDIRECT_URI);
+        oAuth2Client.setCredentials({
+            refresh_token: process.env.GMAIL_REFRESH_TOKEN,
         });
-        console.log('✅ Correo enviado:', info.messageId);
+        const gmail = googleapis_1.google.gmail({ version: 'v1', auth: oAuth2Client });
+        const makeBody = (to, subject, message) => {
+            const str = [
+                `To: ${to}`,
+                `From: ${process.env.GMAIL_USER}`,
+                'Content-Type: text/html; charset=UTF-8',
+                `Subject: ${subject}`,
+                '',
+                message,
+            ].join('\n');
+            return Buffer.from(str)
+                .toString('base64')
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
+        };
+        const raw = makeBody('destinatario@example.com', 'Prueba Gmail API Railway', '<h1>¡Hola desde Gmail API en Railway!</h1><p>Funciona sin SMTP.</p>');
+        const res = await gmail.users.messages.send({
+            userId: 'me',
+            requestBody: { raw },
+        });
+        console.log('✅ Correo enviado, ID:', res.data.id);
     }
     catch (err) {
-        console.error('❌ Error al enviar el correo:', err);
+        console.error('❌ Error enviando correo:', err);
     }
-})();
+}
+testGmailApi();
 //# sourceMappingURL=test-mail.js.map

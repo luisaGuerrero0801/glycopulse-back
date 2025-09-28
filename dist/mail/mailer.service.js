@@ -11,20 +11,47 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MailerService = void 0;
 const common_1 = require("@nestjs/common");
-const nodemailer_1 = require("nodemailer");
+const googleapis_1 = require("googleapis");
 const jwt_1 = require("@nestjs/jwt");
 let MailerService = class MailerService {
-    constructor(jwtService, transporter) {
+    constructor(jwtService, gmail) {
         this.jwtService = jwtService;
-        this.transporter = transporter;
+        this.gmail = gmail;
         console.log('📦 Gmail Transporter cargado con OAuth2');
     }
     generateVerificationToken(userId) {
         return this.jwtService.sign({ sub: userId }, { expiresIn: '1d' });
+    }
+    makeBody(to, subject, html) {
+        const str = [
+            `To: ${to}`,
+            `From: GlycoPulse <${process.env.GMAIL_USER}>`,
+            'Content-Type: text/html; charset=UTF-8',
+            `Subject: ${subject}`,
+            '',
+            html,
+        ].join('\n');
+        return Buffer.from(str)
+            .toString('base64')
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/, '');
+    }
+    async sendMail(to, subject, html) {
+        try {
+            const raw = this.makeBody(to, subject, html);
+            const res = await this.gmail.users.messages.send({
+                userId: 'me',
+                requestBody: { raw },
+            });
+            console.log(`✅ Correo enviado (${subject}):`, res.data.id);
+        }
+        catch (error) {
+            console.error(`❌ Error enviando correo (${subject}):`, error);
+        }
     }
     async sendVerificationEmail(to, token) {
         const frontendUrl = process.env.FRONTEND_URL;
@@ -47,18 +74,7 @@ let MailerService = class MailerService {
         <p style="margin-top: 30px;">Si no solicitaste esto, puedes ignorar este mensaje.</p>
       </div>
     `;
-        try {
-            const info = await this.transporter.sendMail({
-                from: `"GlycoPulse" <${process.env.GMAIL_USER}>`,
-                to,
-                subject: 'Verificación de cuenta - GlycoPulse',
-                html,
-            });
-            console.log('✅ Correo de verificación enviado:', info.messageId);
-        }
-        catch (error) {
-            console.error('❌ Error al enviar correo de verificación:', error);
-        }
+        await this.sendMail(to, 'Verificación de cuenta - GlycoPulse', html);
     }
     async sendRecoveryEmail(to, token) {
         const frontendUrl = process.env.FRONTEND_URL;
@@ -80,24 +96,13 @@ let MailerService = class MailerService {
         <p style="margin-top: 30px;">Si no solicitaste esto, ignora este mensaje.</p>
       </div>
     `;
-        try {
-            const info = await this.transporter.sendMail({
-                from: `"GlycoPulse" <${process.env.GMAIL_USER}>`,
-                to,
-                subject: 'Recuperación de contraseña - GlycoPulse',
-                html,
-            });
-            console.log('✅ Correo de recuperación enviado:', info.messageId);
-        }
-        catch (error) {
-            console.error('❌ Error al enviar correo de recuperación:', error);
-        }
+        await this.sendMail(to, 'Recuperación de contraseña - GlycoPulse', html);
     }
 };
 exports.MailerService = MailerService;
 exports.MailerService = MailerService = __decorate([
     (0, common_1.Injectable)(),
-    __param(1, (0, common_1.Inject)('MAILER_TRANSPORTER')),
-    __metadata("design:paramtypes", [jwt_1.JwtService, typeof (_a = typeof nodemailer_1.Transporter !== "undefined" && nodemailer_1.Transporter) === "function" ? _a : Object])
+    __param(1, (0, common_1.Inject)('GMAIL_CLIENT')),
+    __metadata("design:paramtypes", [jwt_1.JwtService, googleapis_1.gmail_v1.Gmail])
 ], MailerService);
 //# sourceMappingURL=mailer.service.js.map

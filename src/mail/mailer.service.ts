@@ -1,18 +1,48 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Transporter } from 'nodemailer';
+import { gmail_v1 } from 'googleapis';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class MailerService {
   constructor(
     private readonly jwtService: JwtService,
-    @Inject('MAILER_TRANSPORTER') private readonly transporter: Transporter
+    @Inject('GMAIL_CLIENT') private readonly gmail: gmail_v1.Gmail
   ) {
     console.log('📦 Gmail Transporter cargado con OAuth2');
   }
 
   generateVerificationToken(userId: number): string {
     return this.jwtService.sign({ sub: userId }, { expiresIn: '1d' });
+  }
+
+  private makeBody(to: string, subject: string, html: string) {
+    const str = [
+      `To: ${to}`,
+      `From: GlycoPulse <${process.env.GMAIL_USER}>`,
+      'Content-Type: text/html; charset=UTF-8',
+      `Subject: ${subject}`,
+      '',
+      html,
+    ].join('\n');
+
+    return Buffer.from(str)
+      .toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+  }
+
+  private async sendMail(to: string, subject: string, html: string) {
+    try {
+      const raw = this.makeBody(to, subject, html);
+      const res = await this.gmail.users.messages.send({
+        userId: 'me',
+        requestBody: { raw },
+      });
+      console.log(`✅ Correo enviado (${subject}):`, res.data.id);
+    } catch (error) {
+      console.error(`❌ Error enviando correo (${subject}):`, error);
+    }
   }
 
   async sendVerificationEmail(to: string, token: string) {
@@ -37,18 +67,7 @@ export class MailerService {
         <p style="margin-top: 30px;">Si no solicitaste esto, puedes ignorar este mensaje.</p>
       </div>
     `;
-
-    try {
-      const info = await this.transporter.sendMail({
-        from: `"GlycoPulse" <${process.env.GMAIL_USER}>`,
-        to,
-        subject: 'Verificación de cuenta - GlycoPulse',
-        html,
-      });
-      console.log('✅ Correo de verificación enviado:', info.messageId);
-    } catch (error) {
-      console.error('❌ Error al enviar correo de verificación:', error);
-    }
+    await this.sendMail(to, 'Verificación de cuenta - GlycoPulse', html);
   }
 
   async sendRecoveryEmail(to: string, token: string) {
@@ -73,16 +92,6 @@ export class MailerService {
       </div>
     `;
 
-    try {
-      const info = await this.transporter.sendMail({
-        from: `"GlycoPulse" <${process.env.GMAIL_USER}>`,
-        to,
-        subject: 'Recuperación de contraseña - GlycoPulse',
-        html,
-      });
-      console.log('✅ Correo de recuperación enviado:', info.messageId);
-    } catch (error) {
-      console.error('❌ Error al enviar correo de recuperación:', error);
-    }
+    await this.sendMail(to, 'Recuperación de contraseña - GlycoPulse', html);
   }
 }

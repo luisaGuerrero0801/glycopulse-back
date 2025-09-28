@@ -7,11 +7,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MailerModule = void 0;
+const gmail_client_1 = require("./gmail.client");
 const common_1 = require("@nestjs/common");
 const mailer_service_1 = require("./mailer.service");
 const config_1 = require("@nestjs/config");
 const jwt_1 = require("@nestjs/jwt");
-const gmail_transporter_1 = require("./gmail.transporter");
 let MailerModule = class MailerModule {
 };
 exports.MailerModule = MailerModule;
@@ -31,9 +31,9 @@ exports.MailerModule = MailerModule = __decorate([
         ],
         providers: [
             {
-                provide: 'MAILER_TRANSPORTER',
+                provide: 'GMAIL_CLIENT',
                 inject: [config_1.ConfigService],
-                useFactory: async (config) => await (0, gmail_transporter_1.createGmailTransporter)(config),
+                useFactory: async (config) => await (0, gmail_client_1.createGmailClient)(config),
             },
             mailer_service_1.MailerService,
         ],
