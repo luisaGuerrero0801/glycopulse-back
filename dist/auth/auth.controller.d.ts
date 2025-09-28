@@ -1,3 +1,4 @@
+import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RecoverAccountDto } from './dto/recover-account.dto';
@@ -10,9 +11,7 @@ export declare class AuthController {
         correoUsuario: string;
         rol: string;
     }>;
-    verify(token: string): Promise<{
-        message: string;
-    }>;
+    verificarCuenta(token: string, res: Response): Promise<void>;
     recuperarCuenta(dto: RecoverAccountDto): Promise<{
         message: string;
     }>;

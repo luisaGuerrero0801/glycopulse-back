@@ -25,8 +25,16 @@ let AuthController = class AuthController {
     login(loginDto) {
         return this.authService.login(loginDto);
     }
-    verify(token) {
-        return this.authService.verificarCuenta(token);
+    async verificarCuenta(token, res) {
+        try {
+            const result = await this.authService.verificarCuenta(token);
+            const frontendUrl = process.env.FRONTEND_URL;
+            return res.redirect(`${frontendUrl}/verification-success?message=${encodeURIComponent(result.message)}`);
+        }
+        catch (error) {
+            const frontendUrl = process.env.FRONTEND_URL;
+            return res.redirect(`${frontendUrl}/verification-failed?message=${encodeURIComponent(error.message)}`);
+        }
     }
     recuperarCuenta(dto) {
         return this.authService.enviarCorreoRecuperacion(dto.correo);
@@ -46,10 +54,11 @@ __decorate([
 __decorate([
     (0, common_1.Get)('verify'),
     __param(0, (0, common_1.Query)('token')),
+    __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], AuthController.prototype, "verify", null);
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "verificarCuenta", null);
 __decorate([
     (0, common_1.Post)('recuperar-cuenta'),
     __param(0, (0, common_1.Body)()),

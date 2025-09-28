@@ -46,8 +46,8 @@ export class MailerService {
   }
 
   async sendVerificationEmail(to: string, token: string) {
-    const frontendUrl = process.env.FRONTEND_URL;
-    const verificationUrl = `${frontendUrl}/verify?token=${token}`;
+    const backendUrl = process.env.BACKEND_URL;
+    const verificationUrl = `${backendUrl}/auth/verify?token=${token}`;
 
     const html = `
       <div style="font-family: Arial, sans-serif;">
