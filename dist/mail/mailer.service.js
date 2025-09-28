@@ -16,9 +16,11 @@ exports.MailerService = void 0;
 const common_1 = require("@nestjs/common");
 const googleapis_1 = require("googleapis");
 const jwt_1 = require("@nestjs/jwt");
+const config_1 = require("@nestjs/config");
 let MailerService = class MailerService {
-    constructor(jwtService, gmail) {
+    constructor(jwtService, configService, gmail) {
         this.jwtService = jwtService;
+        this.configService = configService;
         this.gmail = gmail;
         console.log('📦 Gmail Transporter cargado con OAuth2');
     }
@@ -26,9 +28,13 @@ let MailerService = class MailerService {
         return this.jwtService.sign({ sub: userId }, { expiresIn: '1d' });
     }
     makeBody(to, subject, html) {
+        const gmailUser = this.configService.get('GMAIL_USER');
+        if (!gmailUser) {
+            throw new Error('GMAIL_USER no está definido en las variables de entorno');
+        }
         const str = [
             `To: ${to}`,
-            `From: GlycoPulse <${process.env.GMAIL_USER}>`,
+            `From: GlycoPulse <${gmailUser}`,
             'Content-Type: text/html; charset=UTF-8',
             `Subject: ${subject}`,
             '',
@@ -54,7 +60,10 @@ let MailerService = class MailerService {
         }
     }
     async sendVerificationEmail(to, token) {
-        const backendUrl = process.env.BACKEND_URL;
+        const backendUrl = this.configService.get('BACKEND_URL');
+        if (!backendUrl) {
+            throw new Error('BACKEND_URL no está definido en las variables de entorno');
+        }
         const verificationUrl = `${backendUrl}/auth/verify?token=${token}`;
         const html = `
       <div style="font-family: Arial, sans-serif;">
@@ -102,7 +111,8 @@ let MailerService = class MailerService {
 exports.MailerService = MailerService;
 exports.MailerService = MailerService = __decorate([
     (0, common_1.Injectable)(),
-    __param(1, (0, common_1.Inject)('GMAIL_CLIENT')),
-    __metadata("design:paramtypes", [jwt_1.JwtService, googleapis_1.gmail_v1.Gmail])
+    __param(2, (0, common_1.Inject)('GMAIL_CLIENT')),
+    __metadata("design:paramtypes", [jwt_1.JwtService,
+        config_1.ConfigService, googleapis_1.gmail_v1.Gmail])
 ], MailerService);
 //# sourceMappingURL=mailer.service.js.map

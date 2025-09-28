@@ -1,11 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { gmail_v1 } from 'googleapis';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class MailerService {
   constructor(
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
     @Inject('GMAIL_CLIENT') private readonly gmail: gmail_v1.Gmail
   ) {
     console.log('📦 Gmail Transporter cargado con OAuth2');
@@ -16,9 +18,15 @@ export class MailerService {
   }
 
   private makeBody(to: string, subject: string, html: string) {
+    const gmailUser = this.configService.get<string>('GMAIL_USER');
+    if (!gmailUser) {
+      throw new Error(
+        'GMAIL_USER no está definido en las variables de entorno'
+      );
+    }
     const str = [
       `To: ${to}`,
-      `From: GlycoPulse <${process.env.GMAIL_USER}>`,
+      `From: GlycoPulse <${gmailUser}`,
       'Content-Type: text/html; charset=UTF-8',
       `Subject: ${subject}`,
       '',
@@ -46,7 +54,13 @@ export class MailerService {
   }
 
   async sendVerificationEmail(to: string, token: string) {
-    const backendUrl = process.env.BACKEND_URL;
+    const backendUrl = this.configService.get<string>('BACKEND_URL');
+    if (!backendUrl) {
+      throw new Error(
+        'BACKEND_URL no está definido en las variables de entorno'
+      );
+    }
+
     const verificationUrl = `${backendUrl}/auth/verify?token=${token}`;
 
     const html = `
